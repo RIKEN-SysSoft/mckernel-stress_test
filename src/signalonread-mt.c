@@ -98,6 +98,8 @@ void subjectTask() {
 	gettimeofday(&timeBeforeRead, NULL);
 	printf("setup: %d ms\n", LAPTIME_MS(timeBeforeFork, timeBeforeRead));
 
+	printf("START TEST\n");
+
 	char* buffp;
 	size_t size_to_read;
 	ssize_t rval;
@@ -115,6 +117,8 @@ void subjectTask() {
 		size_to_read -= rval;
 		buffp += rval;
 	}
+
+	printf("TEST FAIL OVERRUN\n");
 
 	gettimeofday(&timeAfterRead, NULL);
 
@@ -140,14 +144,12 @@ void* subjectThread(void* arg) {
 
 	printf("[%d] I am a subjectThread %d, %x %x\n", getpid(), thread->tid, thread->pthread, pthread_self());
 
-
-	sleep(random() % 5 + 1);
-
-	printf("[%d:%d] wake up\n", getpid(), thread->tid);
+	//sleep(random() % 5 + 1);
+	//printf("[%d:%d] wake up\n", getpid(), thread->tid);
 
 	pthread_barrier_wait(&barrier);
 
-	printf("[%d:%d] barrier ok\n", getpid(), thread->tid);
+	//printf("[%d:%d] barrier ok\n", getpid(), thread->tid);
 
 	if (thread->tid != 0) {
 		for(;;);
@@ -163,7 +165,7 @@ void examinerProcess(pid_t subject) {
 	printf("[%d] I am the examiner for %d.\n", getpid(), subject);
 
 	struct timespec req, rem;
-	req.tv_sec = 8;
+	req.tv_sec = 0;
 	req.tv_nsec = 500000000; // 500msec
 
 	if (nanosleep(&req, &rem) < 0) {
@@ -175,7 +177,8 @@ void examinerProcess(pid_t subject) {
 		onError("waitpid fail");
 	}
 
-	printf("FINISH\n");
+	printf("TEST SUCCESSED IF YOU DO NOT SEE 'OVERRUN'\n");
+	printf("TEST FINISH\n");
 }
 
 
