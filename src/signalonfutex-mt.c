@@ -9,6 +9,8 @@
 #include <signal.h>
 #include <pthread.h>
 #include <sys/wait.h>
+#include <linux/futex.h>
+#include <sys/syscall.h>
 
 #if !defined(SINGLE) && !defined(MULTI) && !defined(NOSIGNAL)
 #error CPP macro should be defined
@@ -17,7 +19,6 @@
 
 #define BUFFSIZE (2LL * 1024LL * 1024LL * 1024LL)
 //#define BUFFSIZE (1024LL * 1024LL)
-
 
 #ifdef MULTI
 #define NUMTHREADS 4
@@ -41,6 +42,7 @@ struct timeval timeAfterRead;
 struct Thread {
 	int tid;
 	pthread_t pthread;
+	int futex_key;
 } thread[NUMTHREADS];
 
 pthread_barrier_t barrier;
@@ -93,17 +95,6 @@ void joinThreads() {
 
 void subjectTask(struct Thread* thread) {
 
-	char* buffer = malloc(BUFFSIZE);
-	if (buffer == NULL) {
-		onError("malloc fail");
-	}
-
-	int fd;
-	fd = open("../tmp/largefile.dat", O_RDONLY);
-	if (fd < 0) {
-		onError("open fail");
-	}
-
 	pthread_barrier_wait(&barrier);
 
 	gettimeofday(&timeBeforeRead, NULL);
@@ -111,30 +102,14 @@ void subjectTask(struct Thread* thread) {
 
 	printf("[%d] START TEST\n", thread->tid);
 
-	char* buffp;
-	size_t size_to_read;
-	ssize_t rval;
-	buffp = buffer;
-	size_to_read = BUFFSIZE;
-	while (size_to_read > 0) {
-		fprintf(stderr, "[%d] %s try to read %lld bytes. buffp=%p\n", thread->tid, argv[0], size_to_read, buffp);
-		rval = read(fd, buffp, size_to_read);
-		if (rval == 0) {
-			break;
-		}
-		if (rval < 0) {
-			onError("read fail");
-		}
-		size_to_read -= rval;
-		buffp += rval;
-	}
+	thread->futex_key = 0;
+	int v = thread->futex_key;
+	syscall(SYS_futex, &thread->futex_key, FUTEX_WAIT, v, NULL);
 
-	printf("[%d] TEST FAIL OVERRUN\n", thread->tid);
+
+	printf("%d TEST FAIL OVERRUN\n", thread->tid);
 
 	gettimeofday(&timeAfterRead, NULL);
-
-	fprintf(stderr, "[%d] %s read %lld bytes\n", thread->tid, argv[0], buffp - buffer);
-	printf("[%d] read: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeRead, timeAfterRead));
 
 	for(;;);
 //	exit(0);
