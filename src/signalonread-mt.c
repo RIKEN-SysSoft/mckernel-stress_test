@@ -18,8 +18,8 @@
 int argc;
 char** argv;
 
-size_t bufferSize;
-char* buffer;
+//size_t bufferSize;
+//char* buffer;
 
 struct timeval timeBeforeFork;
 struct timeval timeBeforeRead;
@@ -41,16 +41,6 @@ void onError(char* message) {
 	exit(-1);
 }
 
-void setup() {
-
-	bufferSize = BUFFSIZE;
-	buffer = malloc(BUFFSIZE);
-	if (buffer == NULL) {
-		onError("malloc fail");
-	}
-//	printf("buffer: %p\n", buffer);
-}
-
 
 void* subjectThread(void*);
 
@@ -61,7 +51,7 @@ void createThreads() {
 	}
 
 	int i;
-	for (i = 0; i < NUMTHREADS; i++) {
+	for (i = 1; i < NUMTHREADS; i++) {
 		int rval;
 		thread[i].tid = i;
 		rval = pthread_create(&thread[i].pthread, NULL, subjectThread, &thread[i]);
@@ -70,6 +60,9 @@ void createThreads() {
 		}
 	}
 
+	thread[0].tid = 0;
+	thread[0].pthread = pthread_self();
+	subjectThread(&thread[0]);
 }
 
 
@@ -77,7 +70,7 @@ void joinThreads() {
 
 	int i;
 
-	for (i = 0; i < NUMTHREADS; i++) {
+	for (i = 1; i < NUMTHREADS; i++) {
 		void* rval;
 		if (pthread_join(thread[i].pthread, &rval)) {
 			onError("pthread_join fail");
@@ -88,17 +81,25 @@ void joinThreads() {
 }
 
 
-void subjectTask() {
+void subjectTask(struct Thread* thread) {
+
+	char* buffer = malloc(BUFFSIZE);
+	if (buffer == NULL) {
+		onError("malloc fail");
+	}
+
 	int fd;
 	fd = open("../tmp/largefile.dat", O_RDONLY);
 	if (fd < 0) {
 		onError("open fail");
 	}
 
-	gettimeofday(&timeBeforeRead, NULL);
-	printf("setup: %d ms\n", LAPTIME_MS(timeBeforeFork, timeBeforeRead));
+	pthread_barrier_wait(&barrier);
 
-	printf("START TEST\n");
+	gettimeofday(&timeBeforeRead, NULL);
+	printf("[%d] setup: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeFork, timeBeforeRead));
+
+	printf("[%d] START TEST\n", thread->tid);
 
 	char* buffp;
 	size_t size_to_read;
@@ -106,7 +107,7 @@ void subjectTask() {
 	buffp = buffer;
 	size_to_read = BUFFSIZE;
 	while (size_to_read > 0) {
-		fprintf(stderr, "%s try to read %lld bytes. buffp=%p\n", argv[0], size_to_read, buffp);
+		fprintf(stderr, "[%d] %s try to read %lld bytes. buffp=%p\n", thread->tid, argv[0], size_to_read, buffp);
 		rval = read(fd, buffp, size_to_read);
 		if (rval == 0) {
 			break;
@@ -118,15 +119,15 @@ void subjectTask() {
 		buffp += rval;
 	}
 
-	printf("TEST FAIL OVERRUN\n");
+	printf("%d TEST FAIL OVERRUN\n", thread->tid);
 
 	gettimeofday(&timeAfterRead, NULL);
 
-	fprintf(stderr, "%s read %lld bytes\n", argv[0], buffp - buffer);
-	printf("read: %d ms\n", LAPTIME_MS(timeBeforeRead, timeAfterRead));
+	fprintf(stderr, "[%d] %s read %lld bytes\n", thread->tid, argv[0], buffp - buffer);
+	printf("[%d] read: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeRead, timeAfterRead));
 
 	for(;;);
-	exit(0);
+//	exit(0);
 }
 
 
@@ -134,7 +135,14 @@ void subjectProcess() {
 
 	printf("[%d] I am a subject.\n", getpid());
 
-	subjectTask();
+//	Subjecttask();
+}
+
+
+void subjectCleanup(void* arg) {
+
+	struct Thread* thread = (struct Thread*) arg;
+	printf("[%d] cleanup\n", thread->tid);
 }
 
 
@@ -144,18 +152,16 @@ void* subjectThread(void* arg) {
 
 	printf("[%d] I am a subjectThread %d, %x %x\n", getpid(), thread->tid, thread->pthread, pthread_self());
 
+	pthread_cleanup_push(subjectCleanup, arg);
+
 	//sleep(random() % 5 + 1);
 	//printf("[%d:%d] wake up\n", getpid(), thread->tid);
 
 	pthread_barrier_wait(&barrier);
 
-	//printf("[%d:%d] barrier ok\n", getpid(), thread->tid);
+	subjectTask(thread);
 
-	if (thread->tid != 0) {
-		for(;;);
-	}
-
-	subjectTask();
+	pthread_cleanup_pop(1);
 
 	return NULL;
 }
@@ -172,13 +178,13 @@ void examinerProcess(pid_t subject) {
 		fprintf(stderr, "nanosleep is interrupted, but ignore\n");
 	}
 
-	kill(subject, SIGINT);
+	kill(subject, SIGTERM);
 	if (waitpid(subject, NULL, 0) < 0) {
 		onError("waitpid fail");
 	}
 
-	printf("TEST SUCCESSED IF YOU DO NOT SEE 'OVERRUN'\n");
-	printf("TEST FINISH\n");
+	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
+	printf("TEST FINISHED\n");
 }
 
 
@@ -189,7 +195,7 @@ int main(int _argc, char** _argv)
 	argc = _argc;
 	argv = _argv;
 
-	setup();
+	//	setup();
 
 	gettimeofday(&timeBeforeFork, NULL);
 	pid = fork();
