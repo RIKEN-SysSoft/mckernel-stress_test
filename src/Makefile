@@ -1,4 +1,4 @@
-all: signalonread signalonfutex
+all: signalonread signalonfutex simultaneousterm
 
 killit : killit.c
 	gcc -o killit killit.c
@@ -13,3 +13,5 @@ signalonfutex : signalonfutex-mt.c killit
 	gcc -lpthread -o signalonfutex-multi -DMULTI signalonfutex-mt.c
 	gcc -lpthread -o signalonfutex-nosignal -DNOSIGNAL signalonfutex-mt.c
 
+simultaneousterm : simultaneousterm.c
+	gcc -lpthread -o simultaneousterm simultaneousterm.c
