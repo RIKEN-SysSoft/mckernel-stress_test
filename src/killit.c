@@ -30,8 +30,19 @@ void examinerProcess(pid_t subject) {
 	}
 
 	kill(subject, SIGINT);
-	if (waitpid(subject, NULL, 0) < 0) {
+
+	int status;
+	if (waitpid(subject, &status, 0) < 0) {
 		onError("waitpid fail");
+	}
+
+	if (WIFEXITED(status)) {
+		printf("The TEST process exited with return value %d\n", WEXITSTATUS(status));
+		return;
+	}
+
+	if (WIFSIGNALED(status)) {
+		printf("The TEST process is terminated by the signal %d\n", WTERMSIG(status));
 	}
 
 	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");

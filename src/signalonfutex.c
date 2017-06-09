@@ -12,10 +12,13 @@
 #include <linux/futex.h>
 #include <sys/syscall.h>
 
-#if !defined(SINGLE) && !defined(NOSIGNAL)
+#if !defined(SINGLE) && !defined(MULTI) && !defined(NOSIGNAL)
 #error CPP macro should be defined
 #endif
 
+
+#define BUFFSIZE (2LL * 1024LL * 1024LL * 1024LL)
+//#define BUFFSIZE (1024LL * 1024LL)
 
 #ifdef MULTI
 #define NUMTHREADS 4
@@ -26,10 +29,12 @@
 int argc;
 char** argv;
 
+//size_t bufferSize;
+//char* buffer;
 
 struct timeval timeBeforeFork;
-struct timeval timeBeforeTest;
-struct timeval timeAfterTest;
+struct timeval timeBeforeRead;
+struct timeval timeAfterRead;
 
 
 #define LAPTIME_MS(start, stop) ((stop.tv_sec - start.tv_sec) * 1000 + (stop.tv_usec - start.tv_usec) / 1000)
@@ -37,6 +42,7 @@ struct timeval timeAfterTest;
 struct Thread {
 	int tid;
 	pthread_t pthread;
+	int futex_key;
 } thread[NUMTHREADS];
 
 pthread_barrier_t barrier;
@@ -91,24 +97,19 @@ void subjectTask(struct Thread* thread) {
 
 	pthread_barrier_wait(&barrier);
 
-	gettimeofday(&timeBeforeTest, NULL);
-	printf("[%d] setup: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeFork, timeBeforeTest));
+	gettimeofday(&timeBeforeRead, NULL);
+	printf("[%d] setup: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeFork, timeBeforeRead));
 
 	printf("[%d] START TEST\n", thread->tid);
 
-	for(;;) {
-		int pid;
-		pid = fork();
-		if (pid < 0) {
-			onError("fork");
-		} else if (pid == 0) {
-			exit(0);
-		}
-	}
+	thread->futex_key = 0;
+	int v = thread->futex_key;
+	syscall(SYS_futex, &thread->futex_key, FUTEX_WAIT, v, NULL);
+
 
 	printf("%d TEST FAIL OVERRUN\n", thread->tid);
 
-	gettimeofday(&timeAfterTest, NULL);
+	gettimeofday(&timeAfterRead, NULL);
 
 	for(;;);
 //	exit(0);
