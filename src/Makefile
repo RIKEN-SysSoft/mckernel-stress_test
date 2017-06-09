@@ -1,4 +1,14 @@
-all: signalonread signalonfutex simultaneousterm
+
+CC		= gcc
+CFLAGS		= -lpthread
+OPT_SINGLE	= -DSINGLE
+OPT_MULTI	= -DMULTI
+OPT_NOSIGNAL	= -DNOSIGNAL
+
+#all: signalonread signalonfutex simultaneousterm signalonfork stackcorruption
+
+all: stackcorruption
+
 
 killit : killit.c
 	gcc -o killit killit.c
@@ -15,3 +25,17 @@ signalonfutex : signalonfutex-mt.c killit
 
 simultaneousterm : simultaneousterm.c
 	gcc -lpthread -o simultaneousterm simultaneousterm.c
+
+signalonfork : signalonfork.c
+	gcc -lpthread -o signalonfork-single -DSINGLE signalonfork.c
+	gcc -lpthread -o signalonfork-nosignal -DNOSIGNAL signalonfork.c
+
+stackcorruption : stackcorruption-single stackcorruption-multi
+	@:
+
+stackcorruption-single : stackcorruption.c
+	$(CC) $(CFLAGS) $(OPT_SINGLE) -o $@ $<
+
+stackcorruption-multi : stackcorruption.c
+	$(CC) $(CFLAGS) $(OPT_MULTI) -o $@ $<
+
