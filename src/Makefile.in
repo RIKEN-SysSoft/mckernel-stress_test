@@ -90,12 +90,10 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = killit$(EXEEXT) signalonreadsingle$(EXEEXT) \
-	signalonreadmulti$(EXEEXT) signalonreadnosignal$(EXEEXT) \
-	signalonfutexsingle$(EXEEXT) signalonfutexmulti$(EXEEXT) \
-	signalonfutexnosignal$(EXEEXT) simultaneousterm$(EXEEXT) \
-	signalonforksingle$(EXEEXT) signalonforknosignal$(EXEEXT) \
-	stackcorruptionsingle$(EXEEXT) stackcorruptionmulti$(EXEEXT)
+bin_PROGRAMS = killit$(EXEEXT) signalonread$(EXEEXT) \
+	signalonfutex$(EXEEXT) simultaneousterm$(EXEEXT) \
+	signalonfork$(EXEEXT) stackcorruption$(EXEEXT) \
+	segviolation$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -111,71 +109,36 @@ PROGRAMS = $(bin_PROGRAMS)
 killit_SOURCES = killit.c
 killit_OBJECTS = killit.$(OBJEXT)
 killit_LDADD = $(LDADD)
-am_signalonforknosignal_OBJECTS =  \
-	signalonforknosignal-signalonfork.$(OBJEXT)
-signalonforknosignal_OBJECTS = $(am_signalonforknosignal_OBJECTS)
-signalonforknosignal_LDADD = $(LDADD)
-signalonforknosignal_LINK = $(CCLD) $(signalonforknosignal_CFLAGS) \
-	$(CFLAGS) $(signalonforknosignal_LDFLAGS) $(LDFLAGS) -o $@
-am_signalonforksingle_OBJECTS =  \
-	signalonforksingle-signalonfork.$(OBJEXT)
-signalonforksingle_OBJECTS = $(am_signalonforksingle_OBJECTS)
-signalonforksingle_LDADD = $(LDADD)
-signalonforksingle_LINK = $(CCLD) $(signalonforksingle_CFLAGS) \
-	$(CFLAGS) $(signalonforksingle_LDFLAGS) $(LDFLAGS) -o $@
-am_signalonfutexmulti_OBJECTS =  \
-	signalonfutexmulti-signalonfutex.$(OBJEXT)
-signalonfutexmulti_OBJECTS = $(am_signalonfutexmulti_OBJECTS)
-signalonfutexmulti_LDADD = $(LDADD)
-signalonfutexmulti_LINK = $(CCLD) $(signalonfutexmulti_CFLAGS) \
-	$(CFLAGS) $(signalonfutexmulti_LDFLAGS) $(LDFLAGS) -o $@
-am_signalonfutexnosignal_OBJECTS =  \
-	signalonfutexnosignal-signalonfutex.$(OBJEXT)
-signalonfutexnosignal_OBJECTS = $(am_signalonfutexnosignal_OBJECTS)
-signalonfutexnosignal_LDADD = $(LDADD)
-signalonfutexnosignal_LINK = $(CCLD) $(signalonfutexnosignal_CFLAGS) \
-	$(CFLAGS) $(signalonfutexnosignal_LDFLAGS) $(LDFLAGS) -o $@
-am_signalonfutexsingle_OBJECTS =  \
-	signalonfutexsingle-signalonfutex.$(OBJEXT)
-signalonfutexsingle_OBJECTS = $(am_signalonfutexsingle_OBJECTS)
-signalonfutexsingle_LDADD = $(LDADD)
-signalonfutexsingle_LINK = $(CCLD) $(signalonfutexsingle_CFLAGS) \
-	$(CFLAGS) $(signalonfutexsingle_LDFLAGS) $(LDFLAGS) -o $@
-am_signalonreadmulti_OBJECTS =  \
-	signalonreadmulti-signalonread.$(OBJEXT)
-signalonreadmulti_OBJECTS = $(am_signalonreadmulti_OBJECTS)
-signalonreadmulti_LDADD = $(LDADD)
-signalonreadmulti_LINK = $(CCLD) $(signalonreadmulti_CFLAGS) $(CFLAGS) \
-	$(signalonreadmulti_LDFLAGS) $(LDFLAGS) -o $@
-am_signalonreadnosignal_OBJECTS =  \
-	signalonreadnosignal-signalonread.$(OBJEXT)
-signalonreadnosignal_OBJECTS = $(am_signalonreadnosignal_OBJECTS)
-signalonreadnosignal_LDADD = $(LDADD)
-signalonreadnosignal_LINK = $(CCLD) $(signalonreadnosignal_CFLAGS) \
-	$(CFLAGS) $(signalonreadnosignal_LDFLAGS) $(LDFLAGS) -o $@
-am_signalonreadsingle_OBJECTS =  \
-	signalonreadsingle-signalonread.$(OBJEXT)
-signalonreadsingle_OBJECTS = $(am_signalonreadsingle_OBJECTS)
-signalonreadsingle_LDADD = $(LDADD)
-signalonreadsingle_LINK = $(CCLD) $(signalonreadsingle_CFLAGS) \
-	$(CFLAGS) $(signalonreadsingle_LDFLAGS) $(LDFLAGS) -o $@
+am_segviolation_OBJECTS = segviolation.$(OBJEXT)
+segviolation_OBJECTS = $(am_segviolation_OBJECTS)
+segviolation_LDADD = $(LDADD)
+segviolation_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(segviolation_LDFLAGS) $(LDFLAGS) -o $@
+am_signalonfork_OBJECTS = signalonfork.$(OBJEXT)
+signalonfork_OBJECTS = $(am_signalonfork_OBJECTS)
+signalonfork_LDADD = $(LDADD)
+signalonfork_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(signalonfork_LDFLAGS) $(LDFLAGS) -o $@
+am_signalonfutex_OBJECTS = signalonfutex.$(OBJEXT)
+signalonfutex_OBJECTS = $(am_signalonfutex_OBJECTS)
+signalonfutex_LDADD = $(LDADD)
+signalonfutex_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(signalonfutex_LDFLAGS) $(LDFLAGS) -o $@
+am_signalonread_OBJECTS = signalonread.$(OBJEXT)
+signalonread_OBJECTS = $(am_signalonread_OBJECTS)
+signalonread_LDADD = $(LDADD)
+signalonread_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(signalonread_LDFLAGS) $(LDFLAGS) -o $@
 am_simultaneousterm_OBJECTS = simultaneousterm.$(OBJEXT)
 simultaneousterm_OBJECTS = $(am_simultaneousterm_OBJECTS)
 simultaneousterm_LDADD = $(LDADD)
 simultaneousterm_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(simultaneousterm_LDFLAGS) $(LDFLAGS) -o $@
-am_stackcorruptionmulti_OBJECTS =  \
-	stackcorruptionmulti-stackcorruption.$(OBJEXT)
-stackcorruptionmulti_OBJECTS = $(am_stackcorruptionmulti_OBJECTS)
-stackcorruptionmulti_LDADD = $(LDADD)
-stackcorruptionmulti_LINK = $(CCLD) $(stackcorruptionmulti_CFLAGS) \
-	$(CFLAGS) $(stackcorruptionmulti_LDFLAGS) $(LDFLAGS) -o $@
-am_stackcorruptionsingle_OBJECTS =  \
-	stackcorruptionsingle-stackcorruption.$(OBJEXT)
-stackcorruptionsingle_OBJECTS = $(am_stackcorruptionsingle_OBJECTS)
-stackcorruptionsingle_LDADD = $(LDADD)
-stackcorruptionsingle_LINK = $(CCLD) $(stackcorruptionsingle_CFLAGS) \
-	$(CFLAGS) $(stackcorruptionsingle_LDFLAGS) $(LDFLAGS) -o $@
+am_stackcorruption_OBJECTS = stackcorruption.$(OBJEXT)
+stackcorruption_OBJECTS = $(am_stackcorruption_OBJECTS)
+stackcorruption_LDADD = $(LDADD)
+stackcorruption_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(stackcorruption_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -192,10 +155,6 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
@@ -208,20 +167,13 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = killit.c $(signalonforknosignal_SOURCES) \
-	$(signalonforksingle_SOURCES) $(signalonfutexmulti_SOURCES) \
-	$(signalonfutexnosignal_SOURCES) \
-	$(signalonfutexsingle_SOURCES) $(signalonreadmulti_SOURCES) \
-	$(signalonreadnosignal_SOURCES) $(signalonreadsingle_SOURCES) \
-	$(simultaneousterm_SOURCES) $(stackcorruptionmulti_SOURCES) \
-	$(stackcorruptionsingle_SOURCES)
-DIST_SOURCES = killit.c $(signalonforknosignal_SOURCES) \
-	$(signalonforksingle_SOURCES) $(signalonfutexmulti_SOURCES) \
-	$(signalonfutexnosignal_SOURCES) \
-	$(signalonfutexsingle_SOURCES) $(signalonreadmulti_SOURCES) \
-	$(signalonreadnosignal_SOURCES) $(signalonreadsingle_SOURCES) \
-	$(simultaneousterm_SOURCES) $(stackcorruptionmulti_SOURCES) \
-	$(stackcorruptionsingle_SOURCES)
+SOURCES = killit.c $(segviolation_SOURCES) $(signalonfork_SOURCES) \
+	$(signalonfutex_SOURCES) $(signalonread_SOURCES) \
+	$(simultaneousterm_SOURCES) $(stackcorruption_SOURCES)
+DIST_SOURCES = killit.c $(segviolation_SOURCES) \
+	$(signalonfork_SOURCES) $(signalonfutex_SOURCES) \
+	$(signalonread_SOURCES) $(simultaneousterm_SOURCES) \
+	$(stackcorruption_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -335,38 +287,18 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-signalonreadsingle_SOURCES = signalonread.c
-signalonreadsingle_LDFLAGS = -lpthread
-signalonreadsingle_CFLAGS = -DSINGLE
-signalonreadmulti_SOURCES = signalonread.c
-signalonreadmulti_LDFLAGS = -lpthread
-signalonreadmulti_CFLAGS = -DMULTI
-signalonreadnosignal_SOURCES = signalonread.c
-signalonreadnosignal_LDFLAGS = -lpthread
-signalonreadnosignal_CFLAGS = -DNOSIGNAL
-signalonfutexsingle_SOURCES = signalonfutex.c
-signalonfutexsingle_LDFLAGS = -lpthread
-signalonfutexsingle_CFLAGS = -DSINGLE
-signalonfutexmulti_SOURCES = signalonfutex.c
-signalonfutexmulti_LDFLAGS = -lpthread
-signalonfutexmulti_CFLAGS = -DMULTI
-signalonfutexnosignal_SOURCES = signalonfutex.c
-signalonfutexnosignal_LDFLAGS = -lpthread
-signalonfutexnosignal_CFLAGS = -DNOSIGNAL
+signalonread_SOURCES = signalonread.c
+signalonread_LDFLAGS = -lpthread
+signalonfutex_SOURCES = signalonfutex.c
+signalonfutex_LDFLAGS = -lpthread
 simultaneousterm_SOURCES = simultaneousterm.c
 simultaneousterm_LDFLAGS = -lpthread
-signalonforksingle_SOURCES = signalonfork.c
-signalonforksingle_LDFLAGS = -lpthread
-signalonforksingle_CFLAGS = -DSINGLE
-signalonforknosignal_SOURCES = signalonfork.c
-signalonforknosignal_LDFLAGS = -lpthread
-signalonforknosignal_CFLAGS = -DNOSIGNAL
-stackcorruptionsingle_SOURCES = stackcorruption.c
-stackcorruptionsingle_LDFLAGS = -lpthread
-stackcorruptionsingle_CFLAGS = -DSINGLE
-stackcorruptionmulti_SOURCES = stackcorruption.c
-stackcorruptionmulti_LDFLAGS = -lpthread
-stackcorruptionmulti_CFLAGS = -DMULTI
+signalonfork_SOURCES = signalonfork.c
+signalonfork_LDFLAGS = -lpthread
+stackcorruption_SOURCES = stackcorruption.c
+stackcorruption_LDFLAGS = -lpthread
+segviolation_SOURCES = segviolation.c
+segviolation_LDFLAGS = -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -447,49 +379,29 @@ killit$(EXEEXT): $(killit_OBJECTS) $(killit_DEPENDENCIES) $(EXTRA_killit_DEPENDE
 	@rm -f killit$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(killit_OBJECTS) $(killit_LDADD) $(LIBS)
 
-signalonforknosignal$(EXEEXT): $(signalonforknosignal_OBJECTS) $(signalonforknosignal_DEPENDENCIES) $(EXTRA_signalonforknosignal_DEPENDENCIES) 
-	@rm -f signalonforknosignal$(EXEEXT)
-	$(AM_V_CCLD)$(signalonforknosignal_LINK) $(signalonforknosignal_OBJECTS) $(signalonforknosignal_LDADD) $(LIBS)
+segviolation$(EXEEXT): $(segviolation_OBJECTS) $(segviolation_DEPENDENCIES) $(EXTRA_segviolation_DEPENDENCIES) 
+	@rm -f segviolation$(EXEEXT)
+	$(AM_V_CCLD)$(segviolation_LINK) $(segviolation_OBJECTS) $(segviolation_LDADD) $(LIBS)
 
-signalonforksingle$(EXEEXT): $(signalonforksingle_OBJECTS) $(signalonforksingle_DEPENDENCIES) $(EXTRA_signalonforksingle_DEPENDENCIES) 
-	@rm -f signalonforksingle$(EXEEXT)
-	$(AM_V_CCLD)$(signalonforksingle_LINK) $(signalonforksingle_OBJECTS) $(signalonforksingle_LDADD) $(LIBS)
+signalonfork$(EXEEXT): $(signalonfork_OBJECTS) $(signalonfork_DEPENDENCIES) $(EXTRA_signalonfork_DEPENDENCIES) 
+	@rm -f signalonfork$(EXEEXT)
+	$(AM_V_CCLD)$(signalonfork_LINK) $(signalonfork_OBJECTS) $(signalonfork_LDADD) $(LIBS)
 
-signalonfutexmulti$(EXEEXT): $(signalonfutexmulti_OBJECTS) $(signalonfutexmulti_DEPENDENCIES) $(EXTRA_signalonfutexmulti_DEPENDENCIES) 
-	@rm -f signalonfutexmulti$(EXEEXT)
-	$(AM_V_CCLD)$(signalonfutexmulti_LINK) $(signalonfutexmulti_OBJECTS) $(signalonfutexmulti_LDADD) $(LIBS)
+signalonfutex$(EXEEXT): $(signalonfutex_OBJECTS) $(signalonfutex_DEPENDENCIES) $(EXTRA_signalonfutex_DEPENDENCIES) 
+	@rm -f signalonfutex$(EXEEXT)
+	$(AM_V_CCLD)$(signalonfutex_LINK) $(signalonfutex_OBJECTS) $(signalonfutex_LDADD) $(LIBS)
 
-signalonfutexnosignal$(EXEEXT): $(signalonfutexnosignal_OBJECTS) $(signalonfutexnosignal_DEPENDENCIES) $(EXTRA_signalonfutexnosignal_DEPENDENCIES) 
-	@rm -f signalonfutexnosignal$(EXEEXT)
-	$(AM_V_CCLD)$(signalonfutexnosignal_LINK) $(signalonfutexnosignal_OBJECTS) $(signalonfutexnosignal_LDADD) $(LIBS)
-
-signalonfutexsingle$(EXEEXT): $(signalonfutexsingle_OBJECTS) $(signalonfutexsingle_DEPENDENCIES) $(EXTRA_signalonfutexsingle_DEPENDENCIES) 
-	@rm -f signalonfutexsingle$(EXEEXT)
-	$(AM_V_CCLD)$(signalonfutexsingle_LINK) $(signalonfutexsingle_OBJECTS) $(signalonfutexsingle_LDADD) $(LIBS)
-
-signalonreadmulti$(EXEEXT): $(signalonreadmulti_OBJECTS) $(signalonreadmulti_DEPENDENCIES) $(EXTRA_signalonreadmulti_DEPENDENCIES) 
-	@rm -f signalonreadmulti$(EXEEXT)
-	$(AM_V_CCLD)$(signalonreadmulti_LINK) $(signalonreadmulti_OBJECTS) $(signalonreadmulti_LDADD) $(LIBS)
-
-signalonreadnosignal$(EXEEXT): $(signalonreadnosignal_OBJECTS) $(signalonreadnosignal_DEPENDENCIES) $(EXTRA_signalonreadnosignal_DEPENDENCIES) 
-	@rm -f signalonreadnosignal$(EXEEXT)
-	$(AM_V_CCLD)$(signalonreadnosignal_LINK) $(signalonreadnosignal_OBJECTS) $(signalonreadnosignal_LDADD) $(LIBS)
-
-signalonreadsingle$(EXEEXT): $(signalonreadsingle_OBJECTS) $(signalonreadsingle_DEPENDENCIES) $(EXTRA_signalonreadsingle_DEPENDENCIES) 
-	@rm -f signalonreadsingle$(EXEEXT)
-	$(AM_V_CCLD)$(signalonreadsingle_LINK) $(signalonreadsingle_OBJECTS) $(signalonreadsingle_LDADD) $(LIBS)
+signalonread$(EXEEXT): $(signalonread_OBJECTS) $(signalonread_DEPENDENCIES) $(EXTRA_signalonread_DEPENDENCIES) 
+	@rm -f signalonread$(EXEEXT)
+	$(AM_V_CCLD)$(signalonread_LINK) $(signalonread_OBJECTS) $(signalonread_LDADD) $(LIBS)
 
 simultaneousterm$(EXEEXT): $(simultaneousterm_OBJECTS) $(simultaneousterm_DEPENDENCIES) $(EXTRA_simultaneousterm_DEPENDENCIES) 
 	@rm -f simultaneousterm$(EXEEXT)
 	$(AM_V_CCLD)$(simultaneousterm_LINK) $(simultaneousterm_OBJECTS) $(simultaneousterm_LDADD) $(LIBS)
 
-stackcorruptionmulti$(EXEEXT): $(stackcorruptionmulti_OBJECTS) $(stackcorruptionmulti_DEPENDENCIES) $(EXTRA_stackcorruptionmulti_DEPENDENCIES) 
-	@rm -f stackcorruptionmulti$(EXEEXT)
-	$(AM_V_CCLD)$(stackcorruptionmulti_LINK) $(stackcorruptionmulti_OBJECTS) $(stackcorruptionmulti_LDADD) $(LIBS)
-
-stackcorruptionsingle$(EXEEXT): $(stackcorruptionsingle_OBJECTS) $(stackcorruptionsingle_DEPENDENCIES) $(EXTRA_stackcorruptionsingle_DEPENDENCIES) 
-	@rm -f stackcorruptionsingle$(EXEEXT)
-	$(AM_V_CCLD)$(stackcorruptionsingle_LINK) $(stackcorruptionsingle_OBJECTS) $(stackcorruptionsingle_LDADD) $(LIBS)
+stackcorruption$(EXEEXT): $(stackcorruption_OBJECTS) $(stackcorruption_DEPENDENCIES) $(EXTRA_stackcorruption_DEPENDENCIES) 
+	@rm -f stackcorruption$(EXEEXT)
+	$(AM_V_CCLD)$(stackcorruption_LINK) $(stackcorruption_OBJECTS) $(stackcorruption_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -498,17 +410,12 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/killit.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonforknosignal-signalonfork.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonforksingle-signalonfork.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonfutexmulti-signalonfutex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonfutexnosignal-signalonfutex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonfutexsingle-signalonfutex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonreadmulti-signalonread.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonreadnosignal-signalonread.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonreadsingle-signalonread.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/segviolation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonfork.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonfutex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simultaneousterm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stackcorruptionmulti-stackcorruption.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stackcorruptionsingle-stackcorruption.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stackcorruption.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -523,146 +430,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-signalonforknosignal-signalonfork.o: signalonfork.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforknosignal_CFLAGS) $(CFLAGS) -MT signalonforknosignal-signalonfork.o -MD -MP -MF $(DEPDIR)/signalonforknosignal-signalonfork.Tpo -c -o signalonforknosignal-signalonfork.o `test -f 'signalonfork.c' || echo '$(srcdir)/'`signalonfork.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonforknosignal-signalonfork.Tpo $(DEPDIR)/signalonforknosignal-signalonfork.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfork.c' object='signalonforknosignal-signalonfork.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforknosignal_CFLAGS) $(CFLAGS) -c -o signalonforknosignal-signalonfork.o `test -f 'signalonfork.c' || echo '$(srcdir)/'`signalonfork.c
-
-signalonforknosignal-signalonfork.obj: signalonfork.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforknosignal_CFLAGS) $(CFLAGS) -MT signalonforknosignal-signalonfork.obj -MD -MP -MF $(DEPDIR)/signalonforknosignal-signalonfork.Tpo -c -o signalonforknosignal-signalonfork.obj `if test -f 'signalonfork.c'; then $(CYGPATH_W) 'signalonfork.c'; else $(CYGPATH_W) '$(srcdir)/signalonfork.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonforknosignal-signalonfork.Tpo $(DEPDIR)/signalonforknosignal-signalonfork.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfork.c' object='signalonforknosignal-signalonfork.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforknosignal_CFLAGS) $(CFLAGS) -c -o signalonforknosignal-signalonfork.obj `if test -f 'signalonfork.c'; then $(CYGPATH_W) 'signalonfork.c'; else $(CYGPATH_W) '$(srcdir)/signalonfork.c'; fi`
-
-signalonforksingle-signalonfork.o: signalonfork.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforksingle_CFLAGS) $(CFLAGS) -MT signalonforksingle-signalonfork.o -MD -MP -MF $(DEPDIR)/signalonforksingle-signalonfork.Tpo -c -o signalonforksingle-signalonfork.o `test -f 'signalonfork.c' || echo '$(srcdir)/'`signalonfork.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonforksingle-signalonfork.Tpo $(DEPDIR)/signalonforksingle-signalonfork.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfork.c' object='signalonforksingle-signalonfork.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforksingle_CFLAGS) $(CFLAGS) -c -o signalonforksingle-signalonfork.o `test -f 'signalonfork.c' || echo '$(srcdir)/'`signalonfork.c
-
-signalonforksingle-signalonfork.obj: signalonfork.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforksingle_CFLAGS) $(CFLAGS) -MT signalonforksingle-signalonfork.obj -MD -MP -MF $(DEPDIR)/signalonforksingle-signalonfork.Tpo -c -o signalonforksingle-signalonfork.obj `if test -f 'signalonfork.c'; then $(CYGPATH_W) 'signalonfork.c'; else $(CYGPATH_W) '$(srcdir)/signalonfork.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonforksingle-signalonfork.Tpo $(DEPDIR)/signalonforksingle-signalonfork.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfork.c' object='signalonforksingle-signalonfork.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonforksingle_CFLAGS) $(CFLAGS) -c -o signalonforksingle-signalonfork.obj `if test -f 'signalonfork.c'; then $(CYGPATH_W) 'signalonfork.c'; else $(CYGPATH_W) '$(srcdir)/signalonfork.c'; fi`
-
-signalonfutexmulti-signalonfutex.o: signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexmulti_CFLAGS) $(CFLAGS) -MT signalonfutexmulti-signalonfutex.o -MD -MP -MF $(DEPDIR)/signalonfutexmulti-signalonfutex.Tpo -c -o signalonfutexmulti-signalonfutex.o `test -f 'signalonfutex.c' || echo '$(srcdir)/'`signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonfutexmulti-signalonfutex.Tpo $(DEPDIR)/signalonfutexmulti-signalonfutex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfutex.c' object='signalonfutexmulti-signalonfutex.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexmulti_CFLAGS) $(CFLAGS) -c -o signalonfutexmulti-signalonfutex.o `test -f 'signalonfutex.c' || echo '$(srcdir)/'`signalonfutex.c
-
-signalonfutexmulti-signalonfutex.obj: signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexmulti_CFLAGS) $(CFLAGS) -MT signalonfutexmulti-signalonfutex.obj -MD -MP -MF $(DEPDIR)/signalonfutexmulti-signalonfutex.Tpo -c -o signalonfutexmulti-signalonfutex.obj `if test -f 'signalonfutex.c'; then $(CYGPATH_W) 'signalonfutex.c'; else $(CYGPATH_W) '$(srcdir)/signalonfutex.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonfutexmulti-signalonfutex.Tpo $(DEPDIR)/signalonfutexmulti-signalonfutex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfutex.c' object='signalonfutexmulti-signalonfutex.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexmulti_CFLAGS) $(CFLAGS) -c -o signalonfutexmulti-signalonfutex.obj `if test -f 'signalonfutex.c'; then $(CYGPATH_W) 'signalonfutex.c'; else $(CYGPATH_W) '$(srcdir)/signalonfutex.c'; fi`
-
-signalonfutexnosignal-signalonfutex.o: signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexnosignal_CFLAGS) $(CFLAGS) -MT signalonfutexnosignal-signalonfutex.o -MD -MP -MF $(DEPDIR)/signalonfutexnosignal-signalonfutex.Tpo -c -o signalonfutexnosignal-signalonfutex.o `test -f 'signalonfutex.c' || echo '$(srcdir)/'`signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonfutexnosignal-signalonfutex.Tpo $(DEPDIR)/signalonfutexnosignal-signalonfutex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfutex.c' object='signalonfutexnosignal-signalonfutex.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexnosignal_CFLAGS) $(CFLAGS) -c -o signalonfutexnosignal-signalonfutex.o `test -f 'signalonfutex.c' || echo '$(srcdir)/'`signalonfutex.c
-
-signalonfutexnosignal-signalonfutex.obj: signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexnosignal_CFLAGS) $(CFLAGS) -MT signalonfutexnosignal-signalonfutex.obj -MD -MP -MF $(DEPDIR)/signalonfutexnosignal-signalonfutex.Tpo -c -o signalonfutexnosignal-signalonfutex.obj `if test -f 'signalonfutex.c'; then $(CYGPATH_W) 'signalonfutex.c'; else $(CYGPATH_W) '$(srcdir)/signalonfutex.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonfutexnosignal-signalonfutex.Tpo $(DEPDIR)/signalonfutexnosignal-signalonfutex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfutex.c' object='signalonfutexnosignal-signalonfutex.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexnosignal_CFLAGS) $(CFLAGS) -c -o signalonfutexnosignal-signalonfutex.obj `if test -f 'signalonfutex.c'; then $(CYGPATH_W) 'signalonfutex.c'; else $(CYGPATH_W) '$(srcdir)/signalonfutex.c'; fi`
-
-signalonfutexsingle-signalonfutex.o: signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexsingle_CFLAGS) $(CFLAGS) -MT signalonfutexsingle-signalonfutex.o -MD -MP -MF $(DEPDIR)/signalonfutexsingle-signalonfutex.Tpo -c -o signalonfutexsingle-signalonfutex.o `test -f 'signalonfutex.c' || echo '$(srcdir)/'`signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonfutexsingle-signalonfutex.Tpo $(DEPDIR)/signalonfutexsingle-signalonfutex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfutex.c' object='signalonfutexsingle-signalonfutex.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexsingle_CFLAGS) $(CFLAGS) -c -o signalonfutexsingle-signalonfutex.o `test -f 'signalonfutex.c' || echo '$(srcdir)/'`signalonfutex.c
-
-signalonfutexsingle-signalonfutex.obj: signalonfutex.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexsingle_CFLAGS) $(CFLAGS) -MT signalonfutexsingle-signalonfutex.obj -MD -MP -MF $(DEPDIR)/signalonfutexsingle-signalonfutex.Tpo -c -o signalonfutexsingle-signalonfutex.obj `if test -f 'signalonfutex.c'; then $(CYGPATH_W) 'signalonfutex.c'; else $(CYGPATH_W) '$(srcdir)/signalonfutex.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonfutexsingle-signalonfutex.Tpo $(DEPDIR)/signalonfutexsingle-signalonfutex.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonfutex.c' object='signalonfutexsingle-signalonfutex.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonfutexsingle_CFLAGS) $(CFLAGS) -c -o signalonfutexsingle-signalonfutex.obj `if test -f 'signalonfutex.c'; then $(CYGPATH_W) 'signalonfutex.c'; else $(CYGPATH_W) '$(srcdir)/signalonfutex.c'; fi`
-
-signalonreadmulti-signalonread.o: signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadmulti_CFLAGS) $(CFLAGS) -MT signalonreadmulti-signalonread.o -MD -MP -MF $(DEPDIR)/signalonreadmulti-signalonread.Tpo -c -o signalonreadmulti-signalonread.o `test -f 'signalonread.c' || echo '$(srcdir)/'`signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonreadmulti-signalonread.Tpo $(DEPDIR)/signalonreadmulti-signalonread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonread.c' object='signalonreadmulti-signalonread.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadmulti_CFLAGS) $(CFLAGS) -c -o signalonreadmulti-signalonread.o `test -f 'signalonread.c' || echo '$(srcdir)/'`signalonread.c
-
-signalonreadmulti-signalonread.obj: signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadmulti_CFLAGS) $(CFLAGS) -MT signalonreadmulti-signalonread.obj -MD -MP -MF $(DEPDIR)/signalonreadmulti-signalonread.Tpo -c -o signalonreadmulti-signalonread.obj `if test -f 'signalonread.c'; then $(CYGPATH_W) 'signalonread.c'; else $(CYGPATH_W) '$(srcdir)/signalonread.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonreadmulti-signalonread.Tpo $(DEPDIR)/signalonreadmulti-signalonread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonread.c' object='signalonreadmulti-signalonread.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadmulti_CFLAGS) $(CFLAGS) -c -o signalonreadmulti-signalonread.obj `if test -f 'signalonread.c'; then $(CYGPATH_W) 'signalonread.c'; else $(CYGPATH_W) '$(srcdir)/signalonread.c'; fi`
-
-signalonreadnosignal-signalonread.o: signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadnosignal_CFLAGS) $(CFLAGS) -MT signalonreadnosignal-signalonread.o -MD -MP -MF $(DEPDIR)/signalonreadnosignal-signalonread.Tpo -c -o signalonreadnosignal-signalonread.o `test -f 'signalonread.c' || echo '$(srcdir)/'`signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonreadnosignal-signalonread.Tpo $(DEPDIR)/signalonreadnosignal-signalonread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonread.c' object='signalonreadnosignal-signalonread.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadnosignal_CFLAGS) $(CFLAGS) -c -o signalonreadnosignal-signalonread.o `test -f 'signalonread.c' || echo '$(srcdir)/'`signalonread.c
-
-signalonreadnosignal-signalonread.obj: signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadnosignal_CFLAGS) $(CFLAGS) -MT signalonreadnosignal-signalonread.obj -MD -MP -MF $(DEPDIR)/signalonreadnosignal-signalonread.Tpo -c -o signalonreadnosignal-signalonread.obj `if test -f 'signalonread.c'; then $(CYGPATH_W) 'signalonread.c'; else $(CYGPATH_W) '$(srcdir)/signalonread.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonreadnosignal-signalonread.Tpo $(DEPDIR)/signalonreadnosignal-signalonread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonread.c' object='signalonreadnosignal-signalonread.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadnosignal_CFLAGS) $(CFLAGS) -c -o signalonreadnosignal-signalonread.obj `if test -f 'signalonread.c'; then $(CYGPATH_W) 'signalonread.c'; else $(CYGPATH_W) '$(srcdir)/signalonread.c'; fi`
-
-signalonreadsingle-signalonread.o: signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadsingle_CFLAGS) $(CFLAGS) -MT signalonreadsingle-signalonread.o -MD -MP -MF $(DEPDIR)/signalonreadsingle-signalonread.Tpo -c -o signalonreadsingle-signalonread.o `test -f 'signalonread.c' || echo '$(srcdir)/'`signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonreadsingle-signalonread.Tpo $(DEPDIR)/signalonreadsingle-signalonread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonread.c' object='signalonreadsingle-signalonread.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadsingle_CFLAGS) $(CFLAGS) -c -o signalonreadsingle-signalonread.o `test -f 'signalonread.c' || echo '$(srcdir)/'`signalonread.c
-
-signalonreadsingle-signalonread.obj: signalonread.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadsingle_CFLAGS) $(CFLAGS) -MT signalonreadsingle-signalonread.obj -MD -MP -MF $(DEPDIR)/signalonreadsingle-signalonread.Tpo -c -o signalonreadsingle-signalonread.obj `if test -f 'signalonread.c'; then $(CYGPATH_W) 'signalonread.c'; else $(CYGPATH_W) '$(srcdir)/signalonread.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/signalonreadsingle-signalonread.Tpo $(DEPDIR)/signalonreadsingle-signalonread.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='signalonread.c' object='signalonreadsingle-signalonread.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(signalonreadsingle_CFLAGS) $(CFLAGS) -c -o signalonreadsingle-signalonread.obj `if test -f 'signalonread.c'; then $(CYGPATH_W) 'signalonread.c'; else $(CYGPATH_W) '$(srcdir)/signalonread.c'; fi`
-
-stackcorruptionmulti-stackcorruption.o: stackcorruption.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionmulti_CFLAGS) $(CFLAGS) -MT stackcorruptionmulti-stackcorruption.o -MD -MP -MF $(DEPDIR)/stackcorruptionmulti-stackcorruption.Tpo -c -o stackcorruptionmulti-stackcorruption.o `test -f 'stackcorruption.c' || echo '$(srcdir)/'`stackcorruption.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/stackcorruptionmulti-stackcorruption.Tpo $(DEPDIR)/stackcorruptionmulti-stackcorruption.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stackcorruption.c' object='stackcorruptionmulti-stackcorruption.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionmulti_CFLAGS) $(CFLAGS) -c -o stackcorruptionmulti-stackcorruption.o `test -f 'stackcorruption.c' || echo '$(srcdir)/'`stackcorruption.c
-
-stackcorruptionmulti-stackcorruption.obj: stackcorruption.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionmulti_CFLAGS) $(CFLAGS) -MT stackcorruptionmulti-stackcorruption.obj -MD -MP -MF $(DEPDIR)/stackcorruptionmulti-stackcorruption.Tpo -c -o stackcorruptionmulti-stackcorruption.obj `if test -f 'stackcorruption.c'; then $(CYGPATH_W) 'stackcorruption.c'; else $(CYGPATH_W) '$(srcdir)/stackcorruption.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/stackcorruptionmulti-stackcorruption.Tpo $(DEPDIR)/stackcorruptionmulti-stackcorruption.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stackcorruption.c' object='stackcorruptionmulti-stackcorruption.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionmulti_CFLAGS) $(CFLAGS) -c -o stackcorruptionmulti-stackcorruption.obj `if test -f 'stackcorruption.c'; then $(CYGPATH_W) 'stackcorruption.c'; else $(CYGPATH_W) '$(srcdir)/stackcorruption.c'; fi`
-
-stackcorruptionsingle-stackcorruption.o: stackcorruption.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionsingle_CFLAGS) $(CFLAGS) -MT stackcorruptionsingle-stackcorruption.o -MD -MP -MF $(DEPDIR)/stackcorruptionsingle-stackcorruption.Tpo -c -o stackcorruptionsingle-stackcorruption.o `test -f 'stackcorruption.c' || echo '$(srcdir)/'`stackcorruption.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/stackcorruptionsingle-stackcorruption.Tpo $(DEPDIR)/stackcorruptionsingle-stackcorruption.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stackcorruption.c' object='stackcorruptionsingle-stackcorruption.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionsingle_CFLAGS) $(CFLAGS) -c -o stackcorruptionsingle-stackcorruption.o `test -f 'stackcorruption.c' || echo '$(srcdir)/'`stackcorruption.c
-
-stackcorruptionsingle-stackcorruption.obj: stackcorruption.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionsingle_CFLAGS) $(CFLAGS) -MT stackcorruptionsingle-stackcorruption.obj -MD -MP -MF $(DEPDIR)/stackcorruptionsingle-stackcorruption.Tpo -c -o stackcorruptionsingle-stackcorruption.obj `if test -f 'stackcorruption.c'; then $(CYGPATH_W) 'stackcorruption.c'; else $(CYGPATH_W) '$(srcdir)/stackcorruption.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/stackcorruptionsingle-stackcorruption.Tpo $(DEPDIR)/stackcorruptionsingle-stackcorruption.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='stackcorruption.c' object='stackcorruptionsingle-stackcorruption.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stackcorruptionsingle_CFLAGS) $(CFLAGS) -c -o stackcorruptionsingle-stackcorruption.obj `if test -f 'stackcorruption.c'; then $(CYGPATH_W) 'stackcorruption.c'; else $(CYGPATH_W) '$(srcdir)/stackcorruption.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
