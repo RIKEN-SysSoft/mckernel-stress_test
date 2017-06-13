@@ -11,26 +11,15 @@
 #include <sys/wait.h>
 #include <linux/futex.h>
 #include <sys/syscall.h>
-
-#if !defined(SINGLE) && !defined(MULTI) && !defined(NOSIGNAL)
-#error CPP macro should be defined
-#endif
+#include <string.h>
 
 
-#define BUFFSIZE (2LL * 1024LL * 1024LL * 1024LL)
-//#define BUFFSIZE (1024LL * 1024LL)
-
-#ifdef MULTI
-#define NUMTHREADS 4
-#else
-#define NUMTHREADS 1
-#endif
+#define MAXNUMTHREADS	256
 
 int argc;
 char** argv;
-
-//size_t bufferSize;
-//char* buffer;
+int numthreads = 1;
+int nosignal = 0;
 
 struct timeval timeBeforeFork;
 struct timeval timeBeforeRead;
@@ -43,7 +32,7 @@ struct Thread {
 	int tid;
 	pthread_t pthread;
 	int futex_key;
-} thread[NUMTHREADS];
+} thread[MAXNUMTHREADS];
 
 pthread_barrier_t barrier;
 
@@ -58,12 +47,12 @@ void* subjectThread(void*);
 
 void createThreads() {
 
-	if (pthread_barrier_init(&barrier, NULL, NUMTHREADS)) {
+	if (pthread_barrier_init(&barrier, NULL, numthreads)) {
 		onError("pthread_barrier_init fail");
 	}
 
 	int i;
-	for (i = 1; i < NUMTHREADS; i++) {
+	for (i = 1; i < numthreads; i++) {
 		int rval;
 		thread[i].tid = i;
 		rval = pthread_create(&thread[i].pthread, NULL, subjectThread, &thread[i]);
@@ -82,7 +71,7 @@ void joinThreads() {
 
 	int i;
 
-	for (i = 1; i < NUMTHREADS; i++) {
+	for (i = 1; i < numthreads; i++) {
 		void* rval;
 		if (pthread_join(thread[i].pthread, &rval)) {
 			onError("pthread_join fail");
@@ -191,33 +180,56 @@ int main(int _argc, char** _argv)
 	argc = _argc;
 	argv = _argv;
 
-#if defined(SINGLE)
-	printf("DANGERTEST SIGNALONFUTEX SINGLE\n");
-#elif defined(MULTI)
-	printf("DANGERTEST SIGNALONFUTEX MULTI\n");
-#elif defined(NOSIGNAL)
-	printf("DANGERTEST SIGNSLONFUTEX NOSIGNAL\n");
-#endif
+	printf("DANGERTEST SIGNALONFUTEX\n");
+
+	int i;
+	for (i = 1; i < argc; i++) {
+		if (strcmp("-nt", argv[i]) == 0) {
+			i++;
+			if (i < argc) {
+				numthreads = atoi(argv[i]);
+				continue;
+			}
+			fprintf(stderr, "%s: num threads required\n", argv[0]);
+			exit(-1);
+		}
+		if (strcmp("-nosignal", argv[i]) == 0) {
+			nosignal = 1;
+			continue;
+		}
+		fprintf(stderr, "%s: argument error\n"
+			"Usage:\n"
+			"\t-nt <num threads>\n"
+			"\t-nosignal\n", argv[0]);
+		exit(-1);
+	}
+
+	if (numthreads < 1 || numthreads > MAXNUMTHREADS) {
+		fprintf(stderr, "%s: invalid num threads\n", argv[0]);
+		exit(-1);
+	}
+
+	printf("NUMTHREADS: %d\n", numthreads);
+	printf("NOSIGNAL: %d\n", nosignal);
 
 	//	setup();
 
 	gettimeofday(&timeBeforeFork, NULL);
 
-#ifdef NOSIGNAL
-	createThreads();
-	joinThreads();
-#else
-	pid = fork();
-	if (pid < 0) {
-		onError("fork");
-	} else if (pid == 0) {
-//		subjectProcess();
+	if (nosignal) {
 		createThreads();
 		joinThreads();
 	} else {
-		examinerProcess(pid);
+		pid = fork();
+		if (pid < 0) {
+			onError("fork");
+		} else if (pid == 0) {
+			createThreads();
+			joinThreads();
+		} else {
+			examinerProcess(pid);
+		}
 	}
-#endif
 
 	return 0;
 }

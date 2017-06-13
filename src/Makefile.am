@@ -3,35 +3,19 @@
 #
 
 bin_PROGRAMS = killit \
-	signalonreadsingle signalonreadmulti signalonreadnosignal \
-	signalonfutexsingle signalonfutexmulti signalonfutexnosignal \
+	signalonread \
+	signalonfutex \
 	simultaneousterm \
 	signalonforksingle signalonforknosignal \
 	stackcorruptionsingle stackcorruptionmulti
 
-signalonreadsingle_SOURCES = signalonread.c
-signalonreadsingle_LDFLAGS = -lpthread
-signalonreadsingle_CFLAGS = -DSINGLE
+signalonread_SOURCES = signalonread.c
+signalonread_LDFLAGS = -lpthread
+signalonread_CFLAGS = -DSINGLE
 
-signalonreadmulti_SOURCES = signalonread.c
-signalonreadmulti_LDFLAGS = -lpthread
-signalonreadmulti_CFLAGS = -DMULTI
-
-signalonreadnosignal_SOURCES = signalonread.c
-signalonreadnosignal_LDFLAGS = -lpthread
-signalonreadnosignal_CFLAGS = -DNOSIGNAL
-
-signalonfutexsingle_SOURCES = signalonfutex.c
-signalonfutexsingle_LDFLAGS = -lpthread
-signalonfutexsingle_CFLAGS = -DSINGLE
-
-signalonfutexmulti_SOURCES = signalonfutex.c
-signalonfutexmulti_LDFLAGS = -lpthread
-signalonfutexmulti_CFLAGS = -DMULTI
-
-signalonfutexnosignal_SOURCES = signalonfutex.c
-signalonfutexnosignal_LDFLAGS = -lpthread
-signalonfutexnosignal_CFLAGS = -DNOSIGNAL
+signalonfutex_SOURCES = signalonfutex.c
+signalonfutex_LDFLAGS = -lpthread
+signalonfutex_CFLAGS = -DSINGLE
 
 simultaneousterm_SOURCES = simultaneousterm.c
 simultaneousterm_LDFLAGS = -lpthread
