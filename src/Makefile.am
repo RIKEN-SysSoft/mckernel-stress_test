@@ -7,7 +7,8 @@ bin_PROGRAMS = killit \
 	signalonfutex \
 	simultaneousterm \
 	signalonfork \
-	stackcorruption
+	stackcorruption \
+	segviolation
 
 signalonread_SOURCES = signalonread.c
 signalonread_LDFLAGS = -lpthread
@@ -23,3 +24,6 @@ signalonfork_LDFLAGS = -lpthread
 
 stackcorruption_SOURCES = stackcorruption.c
 stackcorruption_LDFLAGS = -lpthread
+
+segviolation_SOURCES = segviolation.c
+segviolation_LDFLAGS = -lpthread
