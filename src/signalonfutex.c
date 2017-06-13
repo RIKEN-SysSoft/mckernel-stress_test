@@ -191,6 +191,14 @@ int main(int _argc, char** _argv)
 	argc = _argc;
 	argv = _argv;
 
+#if defined(SINGLE)
+	printf("DANGERTEST SIGNALONFUTEX SINGLE\n");
+#elif defined(MULTI)
+	printf("DANGERTEST SIGNALONFUTEX MULTI\n");
+#elif defined(NOSIGNAL)
+	printf("DANGERTEST SIGNSLONFUTEX NOSIGNAL\n");
+#endif
+
 	//	setup();
 
 	gettimeofday(&timeBeforeFork, NULL);

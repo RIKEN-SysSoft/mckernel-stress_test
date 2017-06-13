@@ -182,6 +182,16 @@ int main(int _argc, char** _argv)
 	argc = _argc;
 	argv = _argv;
 
+#if defined(SINGLE)
+	printf("DANGERTEST SIMULTANEOUSTERM SINGLE\n");
+#elif defined(MULTI)
+	printf("DANGERTEST SIMULTANEOUSTERM MULTI\n");
+#elif defined(NOSIGNAL)
+	printf("DANGERTEST SIMULTANEOUSTERM NOSIGNAL\n");
+#else
+	printf("DANGERTEST SIMULTANEOUSTERM\n");
+#endif
+
 	//	setup();
 
 	gettimeofday(&timeBeforeFork, NULL);
