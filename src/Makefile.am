@@ -2,6 +2,11 @@
 #
 #
 
+dist_bin_SCRIPTS = config.sh \
+	mck-boot.sh \
+	mck-stop.sh \
+	mck-mcexec.sh
+
 bin_PROGRAMS = killit \
 	signalonread \
 	signalonfutex \
