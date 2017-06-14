@@ -15,6 +15,7 @@ int argc;
 char** argv;
 int numprocesses = 1;
 int waitmsec = 500; // 500msec
+int nosignal = 0;
 
 pid_t subjectpid[MAXNUMPROCESSES];
 
@@ -39,10 +40,12 @@ void examinerProcess() {
 
 	int i;
 
-	for (i = 0; i < numprocesses; i++) {
-		if (kill(subjectpid[i], SIGINT) < 0) {
-			printf("[%d] TEST EXITED ALREADY\n", subjectpid[i]);
-			subjectpid[i] = 0;
+	if (!nosignal) {
+		for (i = 0; i < numprocesses; i++) {
+			if (kill(subjectpid[i], SIGINT) < 0) {
+				printf("[%d] TEST EXITED ALREADY\n", subjectpid[i]);
+				subjectpid[i] = 0;
+			}
 		}
 	}
 
@@ -102,6 +105,11 @@ int main(int _argc, char** _argv)
 			fprintf(stderr, "%s: timer value (msec) required\n", argv[0]);
 			return -1;
 		}
+		if (strcmp("-nosignal", argv[i]) == 0) {
+			i++;
+			nosignal = 1;
+			continue;
+		}
 		fprintf(stderr, "%s: invalid option\n", argv[0]);
 		return -1;
 	}
@@ -119,8 +127,7 @@ int main(int _argc, char** _argv)
 	printf("DANGERTEST KILLIT\n");
 	printf("NUMPROCESSES: %d\n", numprocesses);
 	printf("WAITMSEC: %d\n", waitmsec);
-
-
+	printf("NOSIGNAL: %d\n", nosignal);
 
 	char** args = calloc(argc, sizeof(char*));
 	int j = 0;

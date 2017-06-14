@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <libgen.h>
 
 
 #define BUFFSIZE (2LL * 1024LL * 1024LL * 1024LL)
@@ -90,7 +91,10 @@ void subjectTask(struct Thread* thread) {
 	}
 
 	int fd;
-	fd = open("../tmp/largefile.dat", O_RDONLY);
+	char filename[1024];
+	snprintf(filename, sizeof(filename), "%s/../share/data/largefile.dat", dirname(argv[0]));
+
+	fd = open(filename, O_RDONLY);
 	if (fd < 0) {
 		onError("open fail");
 	}
