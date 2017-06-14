@@ -132,7 +132,7 @@ else
     exit -1
 fi
 
-NUMTHREADS=`awk '$4=="processes"{print $3}' /tmp/dtest-threads.log`
+NUMTHREADS=`awk '$4=="threads"{print $3}' /tmp/dtest-threads.log`
 
 if [ $NUMTHREADS -eq 0 ]; then
     echo SUCCESS $NUMTHREADS threads found
