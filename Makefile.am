@@ -1,2 +1,2 @@
-SUBDIRS = src tmp
+SUBDIRS = src data
 
