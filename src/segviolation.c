@@ -169,7 +169,7 @@ void examinerProcess(pid_t subject) {
 
 	if (WIFSIGNALED(status)) {
 		printf("The TEST process is terminated by the signal %d\n", WTERMSIG(status));
-		if (WTERMSIG(status) == SIGTERM) {
+		if (WTERMSIG(status) == SIGSEGV) {
 			printf("TEST SUCCESSED\n");
 		} else {
 			printf("TEST FAILED\n");
