@@ -32,7 +32,7 @@ void examinerProcess() {
 	struct timespec req, rem;
 
 	req.tv_sec = waitmsec / 1000;
-	req.tv_nsec = (waitmsec % 1000) * 1000;
+	req.tv_nsec = (waitmsec % 1000) * 1000000;
 
 	if (nanosleep(&req, &rem) < 0) {
 		fprintf(stderr, "nanosleep is interrupted, but ignore\n");
