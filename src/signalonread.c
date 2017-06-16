@@ -13,15 +13,16 @@
 #include <libgen.h>
 
 
-#define BUFFSIZE (2LL * 1024LL * 1024LL * 1024LL)
-//#define BUFFSIZE (1024LL * 1024LL)
-
+#define MAXBUFFSIZE (2LL * 1024LL * 1024LL * 1024LL)
 #define MAXNUMTHREADS	256
+#define DEFAULTTIMETOWAIT 500
 
 int argc;
 char** argv;
 int numthreads = 1;
 int nosignal = 0;
+size_t buffsize = MAXBUFFSIZE;
+int timetowait = DEFAULTTIMETOWAIT;
 
 struct timeval timeBeforeFork;
 struct timeval timeBeforeRead;
@@ -85,7 +86,7 @@ void joinThreads() {
 
 void subjectTask(struct Thread* thread) {
 
-	char* buffer = malloc(BUFFSIZE);
+	char* buffer = malloc(buffsize);
 	if (buffer == NULL) {
 		onError("malloc fail");
 	}
@@ -110,7 +111,7 @@ void subjectTask(struct Thread* thread) {
 	size_t size_to_read;
 	ssize_t rval;
 	buffp = buffer;
-	size_to_read = BUFFSIZE;
+	size_to_read = buffsize;
 	while (size_to_read > 0) {
 		fprintf(stderr, "[%d] %s try to read %lld bytes. buffp=%p\n", thread->tid, argv[0], size_to_read, buffp);
 		rval = read(fd, buffp, size_to_read);
@@ -131,8 +132,8 @@ void subjectTask(struct Thread* thread) {
 	fprintf(stderr, "[%d] %s read %lld bytes\n", thread->tid, argv[0], buffp - buffer);
 	printf("[%d] read: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeRead, timeAfterRead));
 
-	for(;;);
-//	exit(0);
+//	for(;;);
+	exit(-1);
 }
 
 
@@ -176,14 +177,17 @@ void examinerProcess(pid_t subject) {
 	printf("[%d] I am the examiner for %d.\n", getpid(), subject);
 
 	struct timespec req, rem;
-	req.tv_sec = 0;
-	req.tv_nsec = 500000000; // 500msec
+	req.tv_sec = timetowait / 1000;
+	req.tv_nsec = (timetowait % 1000) * 1000000;
 
 	if (nanosleep(&req, &rem) < 0) {
 		fprintf(stderr, "nanosleep is interrupted, but ignore\n");
 	}
 
-	kill(subject, SIGTERM);
+	if (kill(subject, SIGTERM) < 0) {
+		printf("TEST FAIL (EXIT ALREADY)\n");
+		exit (-1);
+	}
 
 	int status;
 	if (waitpid(subject, &status, 0) < 0) {
@@ -191,16 +195,28 @@ void examinerProcess(pid_t subject) {
 	}
 
 	if (WIFEXITED(status)) {
-		printf("The TEST process exited with return value %d\n", WEXITSTATUS(status));
+		printf("The TEST process unexpectedly exited with return value %d\n", WEXITSTATUS(status));
+		printf("TEST FAILED\n");
+		if (WEXITSTATUS(status) == 0) {
+			exit(-1);
+		} else {
+			exit(WEXITSTATUS(status));
+		}
 		return;
 	}
 
 	if (WIFSIGNALED(status)) {
 		printf("The TEST process is terminated by the signal %d\n", WTERMSIG(status));
+		if (WTERMSIG(status) == SIGTERM) {
+			printf("TEST SUCCESSED\n");
+		} else {
+			printf("TEST FAILED\n");
+			exit(WTERMSIG(status));
+		}
 	}
 
-	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
-	printf("TEST FINISHED\n");
+//	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
+//	printf("TEST FINISHED\n");
 }
 
 
@@ -228,10 +244,27 @@ int main(int _argc, char** _argv)
 			nosignal = 1;
 			continue;
 		}
+		if (strcmp("-t", argv[i]) == 0) {
+			i++;
+			if (i < argc) {
+				timetowait = atoi(argv[i]);
+				continue;
+			}
+		}
+		if (strcmp("-s", argv[i]) == 0) {
+			i++;
+			if (i < argc) {
+				buffsize = atoll(argv[i]);
+				continue;
+			}
+		}
 		fprintf(stderr, "%s: argument error\n"
 			"Usage:\n"
 			"\t-nt <num threads>\n"
-			"\t-nosignal\n", argv[0]);
+			"\t-nosignal\n"
+			"\t-t <time to wait (msec)>\n"
+			"\t-s <size to receive (bytes)>\n",
+			argv[0]);
 		exit(-1);
 	}
 
@@ -242,6 +275,8 @@ int main(int _argc, char** _argv)
 
 	printf("NUMTHREADS: %d\n", numthreads);
 	printf("NOSIGNAL: %d\n", nosignal);
+	printf("TIMETOWAIT: %d msec\n", timetowait);
+	printf("BUFFSIZE: %lld\n", buffsize);
 
 	//	setup();
 
