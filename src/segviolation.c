@@ -151,31 +151,34 @@ void* subjectThread(void* arg) {
 void examinerProcess(pid_t subject) {
 	printf("[%d] I am the examiner for %d.\n", getpid(), subject);
 
-	struct timespec req, rem;
-	req.tv_sec = 0;
-	req.tv_nsec = 500000000; // 500msec
-
-	if (nanosleep(&req, &rem) < 0) {
-		fprintf(stderr, "nanosleep is interrupted, but ignore\n");
-	}
-
-//	kill(subject, SIGTERM);
 	int status;
 	if (waitpid(subject, &status, 0) < 0) {
 		onError("waitpid fail");
 	}
 
 	if (WIFEXITED(status)) {
-		printf("The TEST process exited with return value %d\n", WEXITSTATUS(status));
+		printf("The TEST process unexpectedly exited with return value %d\n", WEXITSTATUS(status));
+		printf("TEST FAILED\n");
+		if (WEXITSTATUS(status) == 0) {
+			exit(-1);
+		} else {
+			exit(WEXITSTATUS(status));
+		}
 		return;
 	}
 
 	if (WIFSIGNALED(status)) {
 		printf("The TEST process is terminated by the signal %d\n", WTERMSIG(status));
+		if (WTERMSIG(status) == SIGTERM) {
+			printf("TEST SUCCESSED\n");
+		} else {
+			printf("TEST FAILED\n");
+			exit(WTERMSIG(status));
+		}
 	}
 
-	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
-	printf("TEST FINISHED\n");
+//	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
+//	printf("TEST FINISHED\n");
 }
 
 

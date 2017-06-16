@@ -150,16 +150,28 @@ void examinerProcess(pid_t subject) {
 	}
 
 	if (WIFEXITED(status)) {
-		printf("The TEST process exited with return value %d\n", WEXITSTATUS(status));
+		printf("The TEST process unexpectedly exited with return value %d\n", WEXITSTATUS(status));
+		printf("TEST FAILED\n");
+		if (WEXITSTATUS(status) == 0) {
+			exit(-1);
+		} else {
+			exit(WEXITSTATUS(status));
+		}
 		return;
 	}
 
 	if (WIFSIGNALED(status)) {
 		printf("The TEST process is terminated by the signal %d\n", WTERMSIG(status));
+		if (WTERMSIG(status) == SIGTERM) {
+			printf("TEST SUCCESSED\n");
+		} else {
+			printf("TEST FAILED\n");
+			exit(WTERMSIG(status));
+		}
 	}
 
-	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
-	printf("TEST FINISHED\n");
+//	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
+//	printf("TEST FINISHED\n");
 }
 
 
