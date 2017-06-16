@@ -40,7 +40,7 @@ pthread_barrier_t barrier;
 
 void onError(char* message) {
 
-	fprintf(stderr,  "%s: %s: %m", argv[0], message);
+	fprintf(stderr,  "%s: %s: %m\n", argv[0], message);
 	exit(-1);
 }
 
