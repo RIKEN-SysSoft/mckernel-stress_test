@@ -94,7 +94,7 @@ POST_UNINSTALL = :
 bin_PROGRAMS = killit$(EXEEXT) signalonread$(EXEEXT) \
 	signalonfutex$(EXEEXT) simultaneousterm$(EXEEXT) \
 	signalonfork$(EXEEXT) stackcorruption$(EXEEXT) \
-	segviolation$(EXEEXT)
+	segviolation$(EXEEXT) stackoverflow$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -141,6 +141,11 @@ stackcorruption_OBJECTS = $(am_stackcorruption_OBJECTS)
 stackcorruption_LDADD = $(LDADD)
 stackcorruption_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(stackcorruption_LDFLAGS) $(LDFLAGS) -o $@
+am_stackoverflow_OBJECTS = stackoverflow.$(OBJEXT)
+stackoverflow_OBJECTS = $(am_stackoverflow_OBJECTS)
+stackoverflow_LDADD = $(LDADD)
+stackoverflow_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(stackoverflow_LDFLAGS) $(LDFLAGS) -o $@
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -199,11 +204,12 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = killit.c $(segviolation_SOURCES) $(signalonfork_SOURCES) \
 	$(signalonfutex_SOURCES) $(signalonread_SOURCES) \
-	$(simultaneousterm_SOURCES) $(stackcorruption_SOURCES)
+	$(simultaneousterm_SOURCES) $(stackcorruption_SOURCES) \
+	$(stackoverflow_SOURCES)
 DIST_SOURCES = killit.c $(segviolation_SOURCES) \
 	$(signalonfork_SOURCES) $(signalonfutex_SOURCES) \
 	$(signalonread_SOURCES) $(simultaneousterm_SOURCES) \
-	$(stackcorruption_SOURCES)
+	$(stackcorruption_SOURCES) $(stackoverflow_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -334,6 +340,8 @@ stackcorruption_SOURCES = stackcorruption.c
 stackcorruption_LDFLAGS = -lpthread
 segviolation_SOURCES = segviolation.c
 segviolation_LDFLAGS = -lpthread
+stackoverflow_SOURCES = stackoverflow.c
+stackoverflow_LDFLAGS = -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -437,6 +445,10 @@ simultaneousterm$(EXEEXT): $(simultaneousterm_OBJECTS) $(simultaneousterm_DEPEND
 stackcorruption$(EXEEXT): $(stackcorruption_OBJECTS) $(stackcorruption_DEPENDENCIES) $(EXTRA_stackcorruption_DEPENDENCIES) 
 	@rm -f stackcorruption$(EXEEXT)
 	$(AM_V_CCLD)$(stackcorruption_LINK) $(stackcorruption_OBJECTS) $(stackcorruption_LDADD) $(LIBS)
+
+stackoverflow$(EXEEXT): $(stackoverflow_OBJECTS) $(stackoverflow_DEPENDENCIES) $(EXTRA_stackoverflow_DEPENDENCIES) 
+	@rm -f stackoverflow$(EXEEXT)
+	$(AM_V_CCLD)$(stackoverflow_LINK) $(stackoverflow_OBJECTS) $(stackoverflow_LDADD) $(LIBS)
 install-dist_binSCRIPTS: $(dist_bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -486,6 +498,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalonread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simultaneousterm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stackcorruption.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stackoverflow.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -13,7 +13,8 @@ bin_PROGRAMS = killit \
 	simultaneousterm \
 	signalonfork \
 	stackcorruption \
-	segviolation
+	segviolation \
+	stackoverflow
 
 signalonread_SOURCES = signalonread.c
 signalonread_LDFLAGS = -lpthread
@@ -32,3 +33,6 @@ stackcorruption_LDFLAGS = -lpthread
 
 segviolation_SOURCES = segviolation.c
 segviolation_LDFLAGS = -lpthread
+
+stackoverflow_SOURCES = stackoverflow.c
+stackoverflow_LDFLAGS = -lpthread

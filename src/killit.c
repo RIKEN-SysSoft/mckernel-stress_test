@@ -71,6 +71,7 @@ void examinerProcess() {
 			printf("[%d] The TEST process is terminated by the signal %d\n", pid, WTERMSIG(status));
 			if (WTERMSIG(status) == SIGINT) {
 				printf("[%d] Terminated expectedly\n", pid);
+				exit(0);
 			} else {
 				printf("[%d] TEST FAILED\n");
 			}
