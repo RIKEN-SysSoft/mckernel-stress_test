@@ -34,7 +34,7 @@ WRAPPER=$LEFT
 COMMAND=$RIGHT
 
 
-timeout $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
+timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
 
 if [ $? -eq 0 ]; then
     echo SUCCESS kmsg
@@ -43,7 +43,7 @@ else
     exit -1
 fi
 
-timeout $TIMEOUT sudo $MCKDIR/sbin/ihkosctl 0 clear_kmsg
+timeout -s 9 $TIMEOUT sudo $MCKDIR/sbin/ihkosctl 0 clear_kmsg
 
 if [ $? -eq 0 ]; then
     echo SUCCESS clear_kmsg
@@ -52,7 +52,7 @@ else
     exit -1
 fi
 
-timeout $TIMEOUT $WRAPPER $MCKDIR/bin/mcexec $COMMAND 1> /tmp/dtest.log 2>&1
+timeout -s 9 $TIMEOUT $WRAPPER $MCKDIR/bin/mcexec $COMMAND 1> /tmp/dtest.log 2>&1
 
 if [ $? -eq 0 ]; then
     echo SUCCESS mcexec
@@ -70,7 +70,7 @@ else
     exit -1
 fi
 
-timeout $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
+timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
 
 if [ $? -eq 0 ]; then
     echo SUCCESS kmsg
@@ -88,7 +88,7 @@ else
     exit -1
 fi
 
-timeout $TIMEOUT $MCKDIR/sbin/ihkosctl 0 ioctl 40000000 1
+timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 ioctl 40000000 1
 
 if [ $? -eq 0 ]; then
     echo SUCCESS ioctl 40000000 1
@@ -97,7 +97,7 @@ else
     exit -1
 fi
 
-timeout $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-process.log
+timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-process.log
 
 if [ $? -eq 0 ]; then
     echo SUCCESS kmsg
@@ -114,7 +114,7 @@ else
     echo FAIL $NUMPROCESSES processes found
 fi
 
-timeout $TIMEOUT $MCKDIR/sbin/ihkosctl 0 ioctl 40000000 2
+timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 ioctl 40000000 2
 
 if [ $? -eq 0 ]; then
     echo SUCCESS ioctl 40000000 2
@@ -123,7 +123,7 @@ else
     exit -1
 fi
 
-timeout $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-threads.log
+timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-threads.log
 
 if [ $? -eq 0 ]; then
     echo SUCCESS kmsg

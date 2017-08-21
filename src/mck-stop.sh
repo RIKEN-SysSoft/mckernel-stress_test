@@ -3,7 +3,7 @@
 BINDIR=`dirname $0`
 . $BINDIR/config.sh
 
-timeout $TIMEOUT sudo $MCKDIR/sbin/mcstop+release.sh
+timeout -s 9 $TIMEOUT sudo $MCKDIR/sbin/mcstop+release.sh
 
 if [ $? -eq 0 ]; then
     echo SUCCESS mcstop+release
