@@ -3,7 +3,7 @@
 BINDIR=`dirname $0`
 . $BINDIR/config.sh
 
-timeout -s 9 $TIMEOUT sudo $MCKDIR/sbin/mcreboot.sh
+timeout -s 9 $TIMEOUT sudo $MCKDIR/sbin/mcreboot.sh $MCREBOOTOPTION
 
 if [ $? -eq 0 ]; then
     echo SUCCESS mcreboot
