@@ -85,19 +85,24 @@ void subjectTask(struct Thread* self) {
 
 	printf("[%d] START TEST\n", self->tid);
 
+	struct timespec req, rem;
+	req.tv_sec = 0;
+	req.tv_nsec = 500000000; // 500msec
+
+	if (nanosleep(&req, &rem) < 0) {
+	  fprintf(stderr, "nanosleep is interrupted, but ignore\n");
+	}
+
 	if (self->tid % 2 == 0) {
 
 		printf("[%d] Send SIGTERM to %d\n", self->tid, self->tid + 1);
-
-		struct timespec req, rem;
-		req.tv_sec = 0;
-		req.tv_nsec = 500000000; // 500msec
-
-		if (nanosleep(&req, &rem) < 0) {
-			fprintf(stderr, "nanosleep is interrupted, but ignore\n");
-		}
-
 		pthread_kill(thread[self->tid + 1].pthread, SIGTERM);
+
+	} else {
+
+		printf("[%d] Send SIGTERM to %d\n", self->tid, self->tid - 1);
+		pthread_kill(thread[self->tid - 1].pthread, SIGTERM);
+
 	}
 
 	for(;;);
