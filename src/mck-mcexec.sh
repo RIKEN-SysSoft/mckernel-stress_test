@@ -42,6 +42,7 @@ COMMAND=$RIGHT
 
 sudo rm -rf /tmp/dtest-*
 
+sleep 3
 timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
 
 if [ $? -eq 0 ]; then
@@ -78,6 +79,7 @@ else
     exit -1
 fi
 
+sleep 3
 timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
 
 if [ $? -eq 0 ]; then
@@ -99,7 +101,7 @@ if [ x$KMSGKW != "x" ]; then
     fi
 else
     NUMMSG=`cat /tmp/dtest-kmsg.log | wc -l`
-    if [ $NUMMSG -eq 1 ]; then
+    if [ "$NUMMSG" -eq 1 ]; then
 	echo SUCCESS kmsg $NUMMSG lines
     else
 	echo FAIL kmsg $NUMMSG lines
@@ -117,6 +119,7 @@ else
     exit -1
 fi
 
+sleep 3
 timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-process.log
 
 if [ $? -eq 0 ]; then
@@ -128,7 +131,7 @@ fi
 
 NUMPROCESSES=`awk '$4=="processes"{print $3}' /tmp/dtest-process.log`
 
-if [ $NUMPROCESSES -eq 0 ]; then
+if [ "$NUMPROCESSES" -eq 0 ]; then
     echo SUCCESS $NUMPROCESSES processes found
 else
     echo FAIL $NUMPROCESSES processes found
@@ -145,6 +148,7 @@ else
     exit -1
 fi
 
+sleep 3
 timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-threads.log
 
 if [ $? -eq 0 ]; then
