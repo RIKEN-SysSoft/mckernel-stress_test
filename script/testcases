@@ -1,5 +1,5 @@
 stress-1-1-segviolation-001	./mck-mcexec.sh -kmsgkw page_fault_handler ./killit -np 4 -nosignal - ./segviolation -nt 4
-stress-1-2-segviolation-001	./mck-mcexec.sh -kmsgkw page_fault_handler ./segviolation -nt 16
+stress-1-2-segviolation-001	./mck-mcexec.sh -kmsgkw page_fault_handler ./segviolation -nt 4
 stress-3-1-signalonread-001	./mck-mcexec.sh ./killit -t 1000 - ./signalonread -nosignal
 stress-3-2-signalonread-001	./mck-mcexec.sh ./killit -np 8 -nosignal - ./signalonread
 stress-3-3-signalonread-001	./mck-mcexec.sh ./signalonread -nt 8
