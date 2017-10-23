@@ -90,21 +90,21 @@ else
 fi
 
 
-if [ x$KMSGKW != "x" ]; then
-    grep $KMSGKW /tmp/dtest-kmsg.log > /dev/null 2>&1
+if [ x"$KMSGKW" != "x" ]; then
+    grep "$KMSGKW" /tmp/dtest-kmsg.log > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-	echo SUCCESS found $KMSGKW in kmsg
+	echo SUCCESS found "$KMSGKW" in kmsg
     else
-	echo FAIL not found $KMSGKW in kmsg
+	echo FAIL not found "$KMSGKW" in kmsg
 	cat /tmp/dtest-kmsg.log
 	exit -1
     fi
 else
     NUMMSG=`cat /tmp/dtest-kmsg.log | wc -l`
     if [ "$NUMMSG" -eq 1 ]; then
-	echo SUCCESS kmsg $NUMMSG lines
+	echo SUCCESS kmsg "$NUMMSG" lines
     else
-	echo FAIL kmsg $NUMMSG lines
+	echo FAIL kmsg "$NUMMSG" lines
 	cat /tmp/dtest-kmsg.log
 	exit -1
     fi
@@ -160,7 +160,7 @@ fi
 
 NUMTHREADS=`awk '$4=="threads"{print $3}' /tmp/dtest-threads.log`
 
-if [ $NUMTHREADS -eq 0 ]; then
+if [ "$NUMTHREADS" -eq 0 ]; then
     echo SUCCESS $NUMTHREADS threads found
 else
     echo FAIL $NUMTHREADS threads found
@@ -168,7 +168,7 @@ else
     exit -1
 fi
 
-if [ $NUMPROCESSES -ne 0 -a $NUMTHREADS -ne 0 ]; then
+if [ "$NUMPROCESSES" -ne 0 -a "$NUMTHREADS" -ne 0 ]; then
     exit -1
 fi
 
