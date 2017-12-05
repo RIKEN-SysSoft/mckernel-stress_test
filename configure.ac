@@ -7,6 +7,8 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 
+CFLAGS=""
+
 # Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
