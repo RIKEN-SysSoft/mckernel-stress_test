@@ -40,6 +40,8 @@ fi
 WRAPPER=$LEFT
 COMMAND=$RIGHT
 
+testname=`echo $COMMAND | cut -d' ' -f 1 | sed 's/\.\///' `
+
 sudo rm -rf /tmp/dtest-*
 
 sleep 3
@@ -100,13 +102,15 @@ if [ x"$KMSGKW" != "x" ]; then
 	exit -1
     fi
 else
-    NUMMSG=`cat /tmp/dtest-kmsg.log | wc -l`
-    if [ "$NUMMSG" -eq 1 ]; then
-	echo SUCCESS kmsg "$NUMMSG" lines
-    else
-	echo FAIL kmsg "$NUMMSG" lines
-	cat /tmp/dtest-kmsg.log
-	exit -1
+    if [ "$testname" != "signalonfork" ] &&  [ "$testname" != "signalonread" ]; then
+	NUMMSG=`cat /tmp/dtest-kmsg.log | wc -l`
+	if [ "$NUMMSG" -eq 1 ]; then
+ 	    echo SUCCESS kmsg "$NUMMSG" lines
+	else
+ 	    echo FAIL kmsg "$NUMMSG" lines
+ 	    cat /tmp/dtest-kmsg.log
+ 	    exit -1
+	fi
     fi
 fi
 
@@ -172,5 +176,10 @@ if [ "$NUMPROCESSES" -ne 0 -a "$NUMTHREADS" -ne 0 ]; then
     exit -1
 fi
 
-
-
+pidof_mcexec=`pidof mcexec`
+if [ "$pidof_mcexec" == "" ]; then
+    echo SUCCESS mcexec not found
+else
+    echo FAIL mcexec found
+    exit -1
+fi
