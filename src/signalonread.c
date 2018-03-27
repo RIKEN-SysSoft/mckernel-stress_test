@@ -172,14 +172,31 @@ void* subjectThread(void* arg) {
 	return NULL;
 }
 
+void
+tvsub(struct timeval *tv1, struct timeval *tv2)
+{
+	tv1->tv_sec -= tv2->tv_sec;
+	tv1->tv_usec -= tv2->tv_usec;
+	if (tv1->tv_usec < 0) {
+		tv1->tv_usec += 1000000;
+		tv1->tv_sec--;
+	}
+}
 
 void examinerProcess(pid_t subject) {
 	printf("[%d] I am the examiner for %d.\n", getpid(), subject);
 
 	struct timespec req, rem;
+	struct timeval tv_start;
+	struct timeval tv_end;
+	struct timeval tv_wk;
+
 	req.tv_sec = timetowait / 1000;
 	req.tv_nsec = (timetowait % 1000) * 1000000;
+	tv_wk.tv_sec = req.tv_sec;
+	tv_wk.tv_usec = (timetowait %1000) * 1000;
 
+	gettimeofday(&tv_start, NULL);
 	if (nanosleep(&req, &rem) < 0) {
 		fprintf(stderr, "nanosleep is interrupted, but ignore\n");
 	}
@@ -192,6 +209,13 @@ void examinerProcess(pid_t subject) {
 	int status;
 	if (waitpid(subject, &status, 0) < 0) {
 		onError("waitpid fail");
+	}
+	gettimeofday(&tv_end, NULL);
+
+	tvsub(&tv_end, &tv_start);
+	tvsub(&tv_end, &tv_wk);
+	if (tv_end.tv_sec) {
+		onError("TEST FAILED: Signal response time is more than or equal to 1 second");
 	}
 
 	if (WIFEXITED(status)) {
