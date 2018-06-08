@@ -107,9 +107,10 @@ else
 	if [ "$NUMMSG" -eq 1 ]; then
  	    echo SUCCESS kmsg "$NUMMSG" lines
 	else
- 	    echo FAIL kmsg "$NUMMSG" lines
- 	    cat /tmp/dtest-kmsg.log
- 	    exit -1
+	    echo "$(basename $0): WARNING: kmsg isn't empty"
+	    echo === kmsg begins ====
+	    cat /tmp/dtest-kmsg.log
+	    echo === kmsg ends ====
 	fi
     fi
 fi
