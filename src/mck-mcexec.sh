@@ -68,7 +68,7 @@ timeout -s 9 $TIMEOUT $WRAPPER $MCKDIR/bin/mcexec $COMMAND 1> /tmp/dtest.log 2>&
 if [ $? -eq 0 ]; then
     echo SUCCESS mcexec
 else
-    echo FAIL mcexec
+    echo "$(basename $0): FAIL: mcexec: $?"
     exit -1
 fi
 
@@ -87,7 +87,7 @@ timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
 if [ $? -eq 0 ]; then
     echo SUCCESS kmsg
 else
-    echo FAIL kmsg
+    echo "$(basename $0): FAIL: ihkosctl kmsg"
     exit -1
 fi
 
