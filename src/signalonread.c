@@ -38,11 +38,11 @@ struct Thread {
 
 pthread_barrier_t barrier;
 
-void onError(char* message) {
-
-	fprintf(stderr,  "%s: %s: %m\n", argv[0], message);
-	exit(-1);
-}
+#define onError(fmt, args...) \
+do { \
+	fprintf(stderr, "%s: " fmt "\n", argv[0], ##args); \
+	exit(-1); \
+} while(0)
 
 
 void* subjectThread(void*);
@@ -215,7 +215,8 @@ void examinerProcess(pid_t subject) {
 	tvsub(&tv_end, &tv_start);
 	tvsub(&tv_end, &tv_wk);
 	if (tv_end.tv_sec) {
-		onError("TEST FAILED: Signal response time is more than or equal to 1 second");
+		onError("TEST FAILED: Signal response time (%f) is >= 1 second",
+				tv_end.tv_sec + (double)tv_end.tv_usec / 1000000);
 	}
 
 	if (WIFEXITED(status)) {
