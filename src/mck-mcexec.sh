@@ -63,12 +63,17 @@ else
     exit -1
 fi
 
+echo "timeout -s 9 $TIMEOUT $WRAPPER $MCKDIR/bin/mcexec $COMMAND 1> /tmp/dtest.log 2>&1"
 timeout -s 9 $TIMEOUT $WRAPPER $MCKDIR/bin/mcexec $COMMAND 1> /tmp/dtest.log 2>&1
 
-if [ $? -eq 0 ]; then
+ret=$?
+if [ $ret -eq 0 ]; then
     echo SUCCESS mcexec
 else
-    echo "$(basename $0): FAIL: mcexec: $?"
+    echo "$(basename $0): FAIL: Test program returned $ret"
+    echo === log begins ===
+    cat /tmp/dtest.log
+    echo === log ends ===
     exit -1
 fi
 
@@ -77,7 +82,10 @@ fgrep FAIL /tmp/dtest.log
 if [ $? -eq 1 ]; then
     echo SUCCESS $WRAPPER mcexec $COMMAND
 else
-    echo FAIL $WRAPPER mcexec $COMMAND
+    echo "$(basename $0): FAIL: Test program reported it in log"
+    echo === log begins ===
+    cat /tmp/dtest.log
+    echo === log ends ===
     exit -1
 fi
 
