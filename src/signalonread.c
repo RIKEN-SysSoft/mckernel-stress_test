@@ -214,8 +214,8 @@ void examinerProcess(pid_t subject) {
 
 	tvsub(&tv_end, &tv_start);
 	tvsub(&tv_end, &tv_wk);
-	if (tv_end.tv_sec) {
-		onError("TEST FAILED: Signal response time (%f) is >= 1 second",
+	if (tv_end.tv_sec >= 2) {
+		onError("TEST FAILED: Signal response time (%f) is >= 2 second",
 				tv_end.tv_sec + (double)tv_end.tv_usec / 1000000);
 	}
 
