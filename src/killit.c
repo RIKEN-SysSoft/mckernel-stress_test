@@ -18,6 +18,7 @@ int waitmsec = 500; // 500msec
 int nosignal = 0;
 
 pid_t subjectpid[MAXNUMPROCESSES];
+int exit_statuses[MAXNUMPROCESSES];
 
 void onError(char* message) {
 
@@ -26,10 +27,20 @@ void onError(char* message) {
 }
 
 
-void examinerProcess() {
-	printf("[%d] I am the examiner.\n", getpid());
-
+int examinerProcess() {
+	int ret;
+	int i;
 	struct timespec req, rem;
+
+	printf("[INFO] pid: %d, file: %s, I am the examiner for ", getpid(), __FILE__);
+	for (i = 0; i < numprocesses; i++) {
+		if (i > 0) {
+			printf(",");
+		}
+		printf("%d", subjectpid[i]);
+	}
+	printf("\n");
+
 
 	req.tv_sec = waitmsec / 1000;
 	req.tv_nsec = (waitmsec % 1000) * 1000000;
@@ -37,8 +48,6 @@ void examinerProcess() {
 	if (nanosleep(&req, &rem) < 0) {
 		fprintf(stderr, "nanosleep is interrupted, but ignore\n");
 	}
-
-	int i;
 
 	if (!nosignal) {
 		for (i = 0; i < numprocesses; i++) {
@@ -60,31 +69,42 @@ void examinerProcess() {
 		}
 		
 		if (WIFEXITED(status)) {
-			printf("[%d] The TEST process exited with return value %d\n", pid, WEXITSTATUS(status));
+			int exit_status = WEXITSTATUS(status);
 			if (WEXITSTATUS(status) == 0) {
-				exit(0);
+				printf("[PASS] pid: %d, file: %s, Target process %d exited normally with return value %d\n", getpid(), __FILE__, pid, exit_status);
+				exit_statuses[i] = 0;
 			} else {
-				printf("[%d] TEST FAILED\n", pid);
-				exit(WEXITSTATUS(status));
+				printf("[FAIL] pid: %d, file: %s. Target process %d exited normally with return value %d\n", getpid(), __FILE__, pid, exit_status);
+				exit_statuses[i] = exit_status;
 			}
 		} else if (WIFSIGNALED(status)) {
-			printf("[%d] The TEST process is terminated by the signal %d\n", pid, WTERMSIG(status));
-			if (WTERMSIG(status) == SIGINT) {
-				printf("[%d] Terminated expectedly\n", pid);
-				exit(0);
+			int sig = WTERMSIG(status);
+			if (sig == SIGINT) {
+				printf("[PASS] pid: %d, file: %s, Target process %d is killed by the signal %d\n", getpid(), __FILE__, pid, sig);
+				exit_statuses[i] = 0;
 			} else {
-				printf("[%d] TEST FAILED\n");
+				printf("[FAIL] pid: %d, file: %s, Target process %d is killed by the signal %d\n", getpid(), __FILE__, pid, sig);
+				exit_statuses[i] = sig;
 			}
-			exit(WTERMSIG(status));
 		}
-
-//		printf("[%d] TEST FINISHED\n", pid);
 	}
+
+	/* Only report the first failure */
+	ret = 0;
+	for (i = 0; i < numprocesses; i++) {
+		if (exit_statuses[i] != 0) {
+			ret = exit_statuses[i];
+			goto out;
+		}
+	}
+out:
+	return ret;
 }
 
 
 int main(int _argc, char** _argv)
 {
+	int ret;
 	pid_t pid;
 
 	argc = _argc;
@@ -136,10 +156,9 @@ int main(int _argc, char** _argv)
 		return -1;
 	}
 
-	printf("DANGERTEST KILLIT\n");
-	printf("NUMPROCESSES: %d\n", numprocesses);
-	printf("WAITMSEC: %d\n", waitmsec);
-	printf("NOSIGNAL: %d\n", nosignal);
+	printf("[INFO] pid: %d, file: %s, numprocesses: %d\n", getpid(), __FILE__, numprocesses);
+	printf("[INFO] pid: %d, file: %s, waitmsec: %d\n", getpid(), __FILE__, waitmsec);
+	printf("[INFO] pid: %d, file: %s, nosignal: %d\n", getpid(), __FILE__, nosignal);
 
 	char** args = calloc(argc, sizeof(char*));
 	int j = 0;
@@ -160,7 +179,7 @@ int main(int _argc, char** _argv)
 		subjectpid[i] = pid;
 	}
 
-	examinerProcess();
+	ret = examinerProcess();
 
-	return 0;
+	return ret;
 }
