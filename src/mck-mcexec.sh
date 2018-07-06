@@ -103,9 +103,9 @@ fi
 if [ x"$KMSGKW" != "x" ]; then
     grep "$KMSGKW" /tmp/dtest-kmsg.log > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-	echo SUCCESS found "$KMSGKW" in kmsg
+	echo SUCCESS keyword "$KMSGKW" found in kmsg
     else
-	echo FAIL not found "$KMSGKW" in kmsg
+	echo FAIL keyword "$KMSGKW" not found in kmsg
 	cat /tmp/dtest-kmsg.log
 	exit -1
     fi
