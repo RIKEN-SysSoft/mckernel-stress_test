@@ -1,7 +1,9 @@
+#define _GNU_SOURCE         /* See feature_test_macros(7) */
+#include <unistd.h>
+#include <sys/syscall.h>   /* For SYS_xxx definitions */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -10,7 +12,6 @@
 #include <pthread.h>
 #include <sys/wait.h>
 #include <linux/futex.h>
-#include <sys/syscall.h>
 #include <string.h>
 
 
@@ -93,9 +94,9 @@ void subjectTask(struct Thread* thread) {
 	pthread_barrier_wait(&barrier);
 
 	gettimeofday(&timeBeforeRead, NULL);
-	printf("[%d] setup: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeFork, timeBeforeRead));
+	printf("[INFO] pid: %d, tid: %d, file: %s, Setup time: %d ms\n", getpid(), syscall(SYS_gettid), __FILE__, LAPTIME_MS(timeBeforeFork, timeBeforeRead));
 
-	printf("[%d] START TEST\n", thread->tid);
+	printf("[INFO] pid: %d, tid: %d, file: %s, Trying to cause SEGV\n",  getpid(), syscall(SYS_gettid), __FILE__);
 
 //	if (thread->tid == 0) {
 		segViolation();
@@ -131,7 +132,7 @@ void* subjectThread(void* arg) {
 
 	struct Thread* thread = (struct Thread*)arg;
 
-	printf("[%d] I am a subjectThread %d, %x %x\n", getpid(), thread->tid, thread->pthread, pthread_self());
+	printf("[INFO] pid: %d, tid: %d, file: %s, I am a subjectThread\n", getpid(), syscall(SYS_gettid), __FILE__);
 
 	pthread_cleanup_push(subjectCleanup, arg);
 
@@ -148,48 +149,48 @@ void* subjectThread(void* arg) {
 }
 
 
-void examinerProcess(pid_t subject) {
-	printf("[%d] I am the examiner for %d.\n", getpid(), subject);
-
+int examinerProcess(pid_t subject) {
+	int ret;
 	int status;
+
+	printf("[INFO] pid: %d, file: %s, I am the examiner for %d.\n", getpid(), __FILE__, subject);
+
 	if (waitpid(subject, &status, 0) < 0) {
 		onError("waitpid fail");
 	}
 
 	if (WIFEXITED(status)) {
-		printf("The TEST process unexpectedly exited with return value %d\n", WEXITSTATUS(status));
-		printf("TEST FAILED\n");
-		if (WEXITSTATUS(status) == 0) {
-			exit(-1);
-		} else {
-			exit(WEXITSTATUS(status));
-		}
-		return;
+		int exit_status = WEXITSTATUS(status);
+		printf("[FAIL] pid: %d, file: %s. Target process exited normally with return value %d\n", getpid(), __FILE__, exit_status);
+		ret = exit_status == 0 ? -1 : exit_status;
+		goto out;
 	}
 
 	if (WIFSIGNALED(status)) {
-		printf("The TEST process is terminated by the signal %d\n", WTERMSIG(status));
-		if (WTERMSIG(status) == SIGSEGV) {
-			printf("TEST SUCCESSED\n");
+		int sig = WTERMSIG(status);
+		if (sig == SIGSEGV) {
+			printf("[PASS] pid: %d, file: %s, Target process is killed by the signal %d\n", getpid(), __FILE__, sig);
+			ret = 0;
 		} else {
-			printf("TEST FAILED\n");
-			exit(WTERMSIG(status));
+			printf("[FAIL] pid: %d, file: %s, Target process is killed by the signal %d\n", getpid(), __FILE__, sig);
+			ret = sig;
 		}
 	}
 
 //	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
 //	printf("TEST FINISHED\n");
+out:
+	return ret;
 }
 
 
 int main(int _argc, char** _argv)
 {
+	int ret = 0;
 	pid_t pid;
 	
 	argc = _argc;
 	argv = _argv;
-
-	printf("DANGERTEST SEGVIOLATION\n");
 
 	int i;
 	for (i = 1; i < argc; i++) {
@@ -218,8 +219,8 @@ int main(int _argc, char** _argv)
 		exit(-1);
 	}
 
-	printf("NUMTHREADS: %d\n", numthreads);
-	printf("NOSIGNAL: %d\n", nosignal);
+	printf("[INFO] pid: %d, file: %s, numthreads: %d\n", getpid(), __FILE__, numthreads);
+	printf("[INFO] pid: %d, file: %s, nosignal: %d\n", getpid(), __FILE__, nosignal);
 
 	//	setup();
 
@@ -236,9 +237,9 @@ int main(int _argc, char** _argv)
 			createThreads();
 			joinThreads();
 		} else {
-			examinerProcess(pid);
+			ret = examinerProcess(pid);
 		}
 	}
 
-	return 0;
+	return ret;
 }
