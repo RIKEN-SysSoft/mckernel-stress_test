@@ -144,7 +144,7 @@ fi
 
 NUMPROCESSES=`awk '$4=="processes"{print $3}' /tmp/dtest-process.log`
 
-if [ "$NUMPROCESSES" -eq 0 ]; then
+if [ "$NUMPROCESSES" == "0" ]; then
     echo SUCCESS $NUMPROCESSES processes found
 else
     echo FAIL $NUMPROCESSES processes found
