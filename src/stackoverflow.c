@@ -82,13 +82,14 @@ void joinThreads() {
 }
 
 
-void stackOverflow(size_t allocsize) {
+void stackOverflow(int order) {
+	void *tmp;
 
-	printf("stackOverflow %lld\n", (long long)allocsize);
-	void* tmp = alloca(allocsize);
-	stackOverflow(allocsize + allocsize);
+	printf("calling alloca(2^%d)\n", order);
+	tmp = alloca(1ULL << order);
+	*((int *)tmp) = 0x12345678;
+	stackOverflow(order >= 30 ? 30 : order + 1);
 }
-
 
 void subjectTask(struct Thread* thread) {
 
@@ -100,7 +101,7 @@ void subjectTask(struct Thread* thread) {
 	printf("[%d] START TEST\n", thread->tid);
 
 //	if (thread->tid == 0) {
-	stackOverflow((size_t) 1024);
+	stackOverflow(10);
 //	}
 
 	printf("%d TEST FAIL OVERRUN\n", thread->tid);
