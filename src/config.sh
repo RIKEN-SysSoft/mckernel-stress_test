@@ -1,9 +1,11 @@
 #!/bin/sh
 
-#MCKDIR=~/install/current/3.10.0-327.36.3.el7.xppsl_1.5.1.4151.x86_64/
+# WORKDIR is defined in /work/mcktest/bin/config.sh
+MCKDIR=${WORKDIR}/mck
+
 #TIMEOUT=180
-MCKDIR=${AUTOTEST_HOME}/mck
 TIMEOUT=60
+
 #MCREBOOTOPTION="-k 1 -f LOG_LOCAL6  -c 1-7,9-15,17-23,25-31 -m 1G@0,1G@1 -r 1-7:0+9-15:8+17-23:16+25-31:24 -o root"
 MCREBOOTOPTION="-k 0 -f LOG_LOCAL6  -c 1-7,9-15,17-23,25-31 -m 1G@0,1G@1 -r 1-7:0+9-15:8+17-23:16+25-31:24 -o root"
 
