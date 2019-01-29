@@ -73,6 +73,12 @@
 /* Define to 1 if `vfork' works. */
 #undef HAVE_WORKING_VFORK
 
+/* Architecture is aarch64 */
+#undef HOST_CPU_AARCH64
+
+/* Architecture is x86_64 */
+#undef HOST_CPU_X86_64
+
 /* Name of package */
 #undef PACKAGE
 

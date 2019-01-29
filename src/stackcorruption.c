@@ -86,7 +86,12 @@ void stackCorruption() {
 	volatile int *addr;
 	volatile void *sp;
 
+#ifdef HOST_CPU_X86_64
 	__asm__("movq %%rsp,%0": "=r"(sp));
+#endif
+#ifdef HOST_CPU_AARCH64
+	__asm__("mov %[dest], sp": [dest] "=r" (sp));
+#endif
 	addr = (int*) (sp + 8);
 	*addr = 0; // overwrite return address
 }

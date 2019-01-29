@@ -32,6 +32,23 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([gettimeofday])
 
+# Resolve architecture
+host_cpu_x86_64=0
+host_cpu_aarch64=0
+
+AC_CANONICAL_HOST
+AS_CASE([$host_cpu],
+	[x86_64],
+	[host_cpu_x86_64=1],
+	[aarch64],
+	[host_cpu_aarch64=1])
+
+AS_IF([test "x$host_cpu_x86_64" == "x0" && test "x$host_cpu_aarch64" == "x0"],
+	    [AC_MSG_ERROR([ERROR: Unknown architecture: $host_cpu])])
+
+AC_DEFINE_UNQUOTED(HOST_CPU_X86_64,"$host_cpu_x86_64",[Architecture is x86_64])
+AC_DEFINE_UNQUOTED(HOST_CPU_AARCH64,"$host_cpu_aarch64",[Architecture is aarch64])
+
 AC_CONFIG_FILES([Makefile
                  data/Makefile
                  src/Makefile])
