@@ -83,11 +83,16 @@ void joinThreads() {
 
 
 void stackOverflow(int order) {
-	void *tmp;
+	void *tmp, *cur;
+	size_t size = 1UL << order;
+	long pgsize = sysconf(_SC_PAGESIZE);
 
-	printf("calling alloca(2^%d)\n", order);
-	tmp = alloca(1ULL << order);
-	*((int *)tmp) = 0x12345678;
+	printf("allocating %d bytes\n", size);
+	tmp = alloca(size);
+	for (cur = tmp; cur < tmp + size; cur += pgsize) {
+	     *((int *)cur) = 0x12345678;
+	}
+
 	stackOverflow(order >= 30 ? 30 : order + 1);
 }
 
@@ -101,7 +106,7 @@ void subjectTask(struct Thread* thread) {
 	printf("[%d] START TEST\n", thread->tid);
 
 //	if (thread->tid == 0) {
-	stackOverflow(10);
+	stackOverflow(16);
 //	}
 
 	printf("%d TEST FAIL OVERRUN\n", thread->tid);
