@@ -40,7 +40,7 @@ pthread_barrier_t barrier;
 
 #define onError(fmt, args...) \
 do { \
-	fprintf(stderr, "%s: " fmt "\n", argv[0], ##args); \
+	fprintf(stderr, "[ NG ] " fmt "\n", ##args); \
 	exit(-1); \
 } while(0)
 
@@ -93,7 +93,7 @@ void subjectTask(struct Thread* thread) {
 
 	int fd;
 	char filename[1024];
-	snprintf(filename, sizeof(filename), "%s/../share/data/largefile.dat", dirname(argv[0]));
+	snprintf(filename, sizeof(filename), "./largefile.dat", dirname(argv[0]));
 
 	fd = open(filename, O_RDONLY);
 	if (fd < 0) {
@@ -103,9 +103,9 @@ void subjectTask(struct Thread* thread) {
 	pthread_barrier_wait(&barrier);
 
 	gettimeofday(&timeBeforeRead, NULL);
-	printf("[%d] setup: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeFork, timeBeforeRead));
-
-	printf("[%d] START TEST\n", thread->tid);
+	printf("[%d] setup took %d ms (should be less than %d ms)\n",
+	       thread->tid, LAPTIME_MS(timeBeforeFork, timeBeforeRead),
+	       timetowait);
 
 	char* buffp;
 	size_t size_to_read;
@@ -113,7 +113,8 @@ void subjectTask(struct Thread* thread) {
 	buffp = buffer;
 	size_to_read = buffsize;
 	while (size_to_read > 0) {
-		fprintf(stderr, "[%d] %s try to read %lld bytes. buffp=%p\n", thread->tid, argv[0], size_to_read, buffp);
+		fprintf(stderr, "[%d] reading %lld bytes...\n",
+			thread->tid, size_to_read, buffp);
 		rval = read(fd, buffp, size_to_read);
 		if (rval == 0) {
 			break;
@@ -125,7 +126,8 @@ void subjectTask(struct Thread* thread) {
 		buffp += rval;
 	}
 
-	printf("[%d] TEST FAIL OVERRUN\n", thread->tid);
+	printf("[ NG ] %d-th thread didn't received a signal while reading\n",
+	       thread->tid);
 
 	gettimeofday(&timeAfterRead, NULL);
 
@@ -202,7 +204,7 @@ void examinerProcess(pid_t subject) {
 	}
 
 	if (kill(subject, SIGTERM) < 0) {
-		printf("TEST FAIL (EXIT ALREADY)\n");
+		printf("[ NG ] child process not found\n");
 		exit (-1);
 	}
 
@@ -215,13 +217,13 @@ void examinerProcess(pid_t subject) {
 	tvsub(&tv_end, &tv_start);
 	tvsub(&tv_end, &tv_wk);
 	if (tv_end.tv_sec >= 2) {
-		onError("TEST FAILED: Signal response time (%f) is >= 2 second",
-				tv_end.tv_sec + (double)tv_end.tv_usec / 1000000);
+		onError("[ NG ] response time (%f) is greater or equal to 2 second",
+			tv_end.tv_sec + (double)tv_end.tv_usec / 1000000);
 	}
 
 	if (WIFEXITED(status)) {
-		printf("The TEST process unexpectedly exited with return value %d\n", WEXITSTATUS(status));
-		printf("TEST FAILED\n");
+		printf("[ NG ] child process exited by itself with return value of %d\n",
+		       WEXITSTATUS(status));
 		if (WEXITSTATUS(status) == 0) {
 			exit(-1);
 		} else {
@@ -231,17 +233,17 @@ void examinerProcess(pid_t subject) {
 	}
 
 	if (WIFSIGNALED(status)) {
-		printf("The TEST process is terminated by the signal %d\n", WTERMSIG(status));
-		if (WTERMSIG(status) == SIGTERM) {
-			printf("TEST SUCCESSED\n");
+		int sig = WTERMSIG(status);
+
+		if (sig == SIGTERM) {
+			printf("[ OK ] child process is killed by the expected signal (%d)\n",
+			       sig);
 		} else {
-			printf("TEST FAILED\n");
-			exit(WTERMSIG(status));
+			printf("[ NG ] child process is killed by an unexpected signal (%d)\n",
+			       sig);
+			exit(sig);
 		}
 	}
-
-//	printf("TEST SUCCESSED IF YOU DID NOT SEE 'OVERRUN'\n");
-//	printf("TEST FINISHED\n");
 }
 
 

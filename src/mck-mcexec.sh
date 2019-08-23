@@ -1,9 +1,5 @@
 #!/bin/sh
 
-BINDIR=`dirname $0`
-. $BINDIR/config.sh
-
-
 LEFT=
 RIGHT=
 KMSGKW=
@@ -40,155 +36,125 @@ fi
 WRAPPER=$LEFT
 COMMAND=$RIGHT
 
-testname=`echo $COMMAND | cut -d' ' -f 1 | sed 's/\.\///' `
+sleep 2
+timeout -s 9 $STRESS_TEST_TIMEOUT $MCKINSTALL/sbin/ihkosctl 0 kmsg > $recorddir/dtest-kmsg.log
 
-sudo rm -rf /tmp/dtest-*
-
-sleep 3
-timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
-
-if [ $? -eq 0 ]; then
-    echo SUCCESS kmsg
-else
-    echo FAIL kmsg
-    exit -1
+if [ $? -ne 0 ]; then
+    echo "[ NG ] kmsg failed"
+    exit 1
 fi
 
-timeout -s 9 $TIMEOUT sudo $MCKDIR/sbin/ihkosctl 0 clear_kmsg
+timeout -s 9 $STRESS_TEST_TIMEOUT sudo $MCKINSTALL/sbin/ihkosctl 0 clear_kmsg
 
-if [ $? -eq 0 ]; then
-    echo SUCCESS clear_kmsg
-else
-    echo FAIL clear_kmsg
-    exit -1
+if [ $? -ne 0 ]; then
+    echo "[ NG ] clear_kmsg failed"
+    exit 1
 fi
 
-echo "timeout -s 9 $TIMEOUT $WRAPPER $MCKDIR/bin/mcexec $COMMAND 1> /tmp/dtest.log 2>&1"
-timeout -s 9 $TIMEOUT $WRAPPER $MCKDIR/bin/mcexec $COMMAND 1> /tmp/dtest.log 2>&1
+ulimit -S -c 0
+
+echo "timeout -s 9 $STRESS_TEST_TIMEOUT $WRAPPER $MCKINSTALL/bin/mcexec $COMMAND 1> $recorddir/dtest.log 2>&1"
+timeout -s 9 $STRESS_TEST_TIMEOUT $WRAPPER $MCKINSTALL/bin/mcexec $COMMAND 1> $recorddir/dtest.log 2>&1
 
 ret=$?
 if [ $ret -eq 0 ]; then
-    echo SUCCESS mcexec
+    echo "[ OK ] no error reported with the exit status"
 else
-    echo "$(basename $0): FAIL: Test program returned $ret"
-    echo === log begins ===
-    cat /tmp/dtest.log
-    echo === log ends ===
-    exit -1
+    echo "[ NG ] error reported with the exit status ($ret), the log follows:"
+    echo "=== log begins ==="
+    cat $recorddir/dtest.log
+    echo "=== log ends ==="
+    exit 1
 fi
 
-fgrep FAIL /tmp/dtest.log
-
-if [ $? -eq 1 ]; then
-    echo SUCCESS $WRAPPER mcexec $COMMAND
+if ! grep -E '(\[ NG \]|FAIL)' $recorddir/dtest.log > /dev/null; then
+    echo "[ OK ] no error reported in the log"
 else
-    echo "$(basename $0): FAIL: Test program reported it in log"
-    echo === log begins ===
-    cat /tmp/dtest.log
-    echo === log ends ===
+    echo "[ NG ] error reported in the log:"
+    echo "=== log begins ==="
+    cat $recorddir/dtest.log
+    echo "=== log ends ==="
     exit -1
 fi
 
 sleep 3
-timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-kmsg.log
+timeout -s 9 $STRESS_TEST_TIMEOUT $MCKINSTALL/sbin/ihkosctl 0 kmsg > $recorddir/dtest-kmsg.log
 
-if [ $? -eq 0 ]; then
-    echo SUCCESS kmsg
-else
-    echo "$(basename $0): FAIL: ihkosctl kmsg"
+if [ $? -ne 0 ]; then
+    echo "[ NG ] kmsg failed"
     exit -1
 fi
 
-
 if [ x"$KMSGKW" != "x" ]; then
-    grep "$KMSGKW" /tmp/dtest-kmsg.log > /dev/null 2>&1
+    grep "$KMSGKW" $recorddir/dtest-kmsg.log > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-	echo SUCCESS keyword "$KMSGKW" found in kmsg
+	echo [ OK ] keyword "$KMSGKW" found in kmsg
     else
-	echo FAIL keyword "$KMSGKW" not found in kmsg
-	cat /tmp/dtest-kmsg.log
-	exit -1
+	echo [ NG ] keyword "$KMSGKW" not found in kmsg
+	cat $recorddir/dtest-kmsg.log
+	exit 1
     fi
 else
     if [ "$testname" != "signalonfork" ] &&  [ "$testname" != "signalonread" ]; then
-	NUMMSG=`cat /tmp/dtest-kmsg.log | wc -l`
-	if [ "$NUMMSG" -eq 1 ]; then
- 	    echo SUCCESS kmsg "$NUMMSG" lines
-	else
-	    echo "$(basename $0): WARNING: kmsg isn't empty"
-	    echo === kmsg begins ====
-	    cat /tmp/dtest-kmsg.log
-	    echo === kmsg ends ====
+	NUMMSG=`cat $recorddir/dtest-kmsg.log | wc -l`
+	if [ "$NUMMSG" -ne 1 ]; then
+	    echo "[INFO] warning: kmsg isn't empty"
 	fi
     fi
 fi
 
-timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 ioctl 40000000 1
+timeout -s 9 $STRESS_TEST_TIMEOUT $MCKINSTALL/sbin/ihkosctl 0 ioctl 40000000 1
 
-if [ $? -eq 0 ]; then
-    echo SUCCESS ioctl 40000000 1
-else
-    echo FAIL ioctl 40000000 1
-    exit -1
+if [ $? -ne 0 ]; then
+    echo "[ NG ] showing number of remaining processes failed"
+    exit 1
 fi
 
 sleep 3
-timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-process.log
+timeout -s 9 $STRESS_TEST_TIMEOUT $MCKINSTALL/sbin/ihkosctl 0 kmsg > $recorddir/dtest-process.log
 
-if [ $? -eq 0 ]; then
-    echo SUCCESS kmsg
-else
-    echo FAIL kmsg
-    exit -1
+if [ $? -ne 0 ]; then
+    echo "[ NG ] kmsg failed"
+    exit 1
 fi
 
-NUMPROCESSES=`awk '$4=="processes"{print $3}' /tmp/dtest-process.log`
+NUMPROCESSES=`awk '$4=="processes"{print $3}' $recorddir/dtest-process.log`
 
 if [ "$NUMPROCESSES" == "0" ]; then
-    echo SUCCESS $NUMPROCESSES processes found
+    echo "[ OK ] no processes remaining"
 else
-    echo FAIL $NUMPROCESSES processes found
-    cat /tmp/dtest-process.log
-    exit -1
+    echo "[ NG ] $NUMPROCESSES processes remaining"
+    exit 1
 fi
 
-timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 ioctl 40000000 2
+timeout -s 9 $STRESS_TEST_TIMEOUT $MCKINSTALL/sbin/ihkosctl 0 ioctl 40000000 2
 
-if [ $? -eq 0 ]; then
-    echo SUCCESS ioctl 40000000 2
-else
-    echo FAIL ioctl 40000000 2
-    exit -1
+if [ $? -ne 0 ]; then
+    echo "[ NG ] showing number of remaining threads failed"
+    exit 1
 fi
 
 sleep 3
-timeout -s 9 $TIMEOUT $MCKDIR/sbin/ihkosctl 0 kmsg > /tmp/dtest-threads.log
+timeout -s 9 $STRESS_TEST_TIMEOUT $MCKINSTALL/sbin/ihkosctl 0 kmsg > $recorddir/dtest-threads.log
 
-if [ $? -eq 0 ]; then
-    echo SUCCESS kmsg
-else
-    echo FAIL kmsg
-    exit -1
+if [ $? -ne 0 ]; then
+    echo [ NG ] kmsg failed
+    exit 1
 fi
 
-NUMTHREADS=`awk '$4=="threads"{print $3}' /tmp/dtest-threads.log`
+NUMTHREADS=`awk '$4=="threads"{print $3}' $recorddir/dtest-threads.log`
 
-if [ "$NUMTHREADS" -eq 0 ]; then
-    echo SUCCESS $NUMTHREADS threads found
+if [ "$NUMTHREADS" == "0" ]; then
+    echo "[ OK ] no threads remaining"
 else
-    echo FAIL $NUMTHREADS threads found
-    cat /tmp/dtest-threads.log
-    exit -1
-fi
-
-if [ "$NUMPROCESSES" -ne 0 -a "$NUMTHREADS" -ne 0 ]; then
-    exit -1
+    echo "[ NG ] $NUMTHREADS threads remaining"
+    exit 1
 fi
 
 pidof_mcexec=`pidof mcexec`
 if [ "$pidof_mcexec" == "" ]; then
-    echo SUCCESS mcexec not found
+    echo "[ OK ] no mcexec running"
 else
-    echo FAIL mcexec found
-    exit -1
+    echo "[ NG ] mcexec is remaining"
+    exit 1
 fi
