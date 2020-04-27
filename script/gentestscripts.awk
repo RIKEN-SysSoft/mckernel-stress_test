@@ -1,9 +1,9 @@
 #!/bin/awk -f
 
+# usage: awk -f gentestscripts.awk testcases
+
 BEGIN {
     autotest_home = "/work/mcktest";
-    testlist = autotest_home "/data/stress-testlist";
-    system("rm -f " testlist);
 }
 
 {
@@ -14,5 +14,4 @@ BEGIN {
     }
     system("sed -e 's#@TESTCASE@#" command "#' run-template.sh > " script);
     system("chmod +x " script);
-    print $1 >> testlist
 }
