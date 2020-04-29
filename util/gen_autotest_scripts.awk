@@ -29,19 +29,8 @@ BEGIN {
 
     # Switch recorddir for McKernel run and Linux run
 
-    printf("if [ \"${linux_run}\" != \"yes\" ]; then\n") >> script;
-
     recorddir_base = "$WORKDIR/output";
-    printf("\trecordfile=%s/%s.output\n", recorddir_base, script_bn) >> script;
-    printf("\trecorddir=%s/%s\n", recorddir_base, script_bn) >> script;
-
-    printf("else\n") >> script;
-
-    recorddir_base = sprintf("%s/data/linux", autotest_home);
-    printf("\trecordfile=%s/%s.output\n", recorddir_base, script_bn) >> script;
-    printf("\trecorddir=%s/%s\n", recorddir_base, script_bn) >> script;
-    
-    printf("fi\n\n") >> script;
+    printf("recorddir=%s/%s\n", recorddir_base, script_bn) >> script;
 
     printf("command_line='%s'\n\n", command_line) >> script;
     print(". ${AUTOTEST_HOME}/stress_test/util/run.sh") >> script;

@@ -14,8 +14,8 @@ fi
 
 # Run test
 pushd STRESS_TEST_DIR/bin > /dev/null
-eval $command_line 2>&1 | tee $recordfile
-exit_code=${PIPESTATUS[0]}
+eval $command_line
+exit_code=$?
 popd > /dev/null
 
 # OK/NG decision
