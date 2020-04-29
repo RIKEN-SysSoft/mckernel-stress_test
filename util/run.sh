@@ -13,7 +13,7 @@ if [ "${linux_run}" != "yes" ]; then
 fi
 
 # Run test
-pushd STRESS_TEST_DIR/bin > /dev/null
+pushd $STRESS_TEST_DIR/bin > /dev/null || exit $?
 eval $command_line
 exit_code=$?
 popd > /dev/null
