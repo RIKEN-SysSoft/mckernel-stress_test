@@ -3,26 +3,21 @@
 # usage: awk -f gen_autotest_scripts.awk testcases
 
 BEGIN { 
+    FS="|"
     "pwd -P" | getline cwd;
     "dirname " ARGV[0] | getline dir;
     "cd " dir "/../.. && pwd -P" | getline autotest_home;
 
     scriptdir = sprintf("%s/data/scripts", autotest_home); 
-    system("rm " scriptdir "/stress-*");
+    system("rm -f " scriptdir "/stress-*");
 }
 
 !/^#|^$/ {
     script_bn = $1;
-    command_line = $2;
-    for (i = 3; i <= NF; i++) {
-	command_line = command_line " " $i;
-    }
+    commands = $2;
     script = sprintf("%s/%s", scriptdir, script_bn);
 
     print "#!/bin/sh\n"  > script;
-
-    print "# Define linux_run" >> script;
-    print ". ${AUTOTEST_HOME}/stress_test/util/linux_run.sh\n" >> script;
 
     print "# Define WORKDIR, DATADIR, MCKINSTALL etc." >> script;
     print ". ${AUTOTEST_HOME}/bin/config.sh\n" >> script;
@@ -32,7 +27,7 @@ BEGIN {
     recorddir_base = "$WORKDIR/output";
     printf("recorddir=%s/%s\n", recorddir_base, script_bn) >> script;
 
-    printf("command_line='%s'\n\n", command_line) >> script;
+    printf("commands='%s'\n\n", commands) >> script;
     print(". ${AUTOTEST_HOME}/stress_test/util/run.sh") >> script;
 
     system("chmod +x " script);
