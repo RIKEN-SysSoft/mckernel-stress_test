@@ -2,6 +2,10 @@
 
 # It's sourced from /work/mcktest/data/scripts/stress-* scripts.
 
+SCRIPT_PATH=$(readlink -m "${BASH_SOURCE[0]}")
+AUTOTEST_HOME="${SCRIPT_PATH%/*/*/*/*}"
+STRESS_TEST_DIR=$AUTOTEST_HOME/stress_test/install
+
 error() {
     echo $1
     exit 1
@@ -10,7 +14,7 @@ error() {
 ihkosctl=$MCKINSTALL/sbin/ihkosctl
 
 # Prepare working directory
-rm -rf $recorddir && mkdir -p $recorddir
+rm -rf $recorddir && mkdir -p $recorddir && pushd $recorddir > /dev/null || error "[ NG ] $recorddir not found"
 
 # Prepare files etc.
 
@@ -19,6 +23,7 @@ $ihkosctl 0 clear_kmsg || exit $?
 old_ulimit=$(ulimit -c)
 ulimit -S -c 0
 
+# e.g. extract "segviolation" from "stress-1-1-segviolation-001"
 testname=$(basename $0)
 testname=${testname%-*}
 testname=${testname##*-}
@@ -33,8 +38,7 @@ linuxprog=$(echo $commands | awk 'BEGIN {FS=","} {print $2}')
 mckprog=$(echo $commands | awk 'BEGIN {FS=","} {print $3}')
 
 # Run test
-pushd $recorddir > /dev/null || error "[ NG ] $recorddir not found"
-eval "timeout -s 9 $STRESS_TEST_TIMEOUT $linuxprog $MCKINSTALL/bin/mcexec $mckprog" > $recorddir/dtest.log 2>&1
+eval "timeout -s 9 $STRESS_TEST_TIMEOUT $STRESS_TEST_DIR/bin/$linuxprog $MCKINSTALL/bin/mcexec $STRESS_TEST_DIR/bin/$mckprog" > $recorddir/dtest.log 2>&1
 ret=$?
 
 # Clean up files etc.

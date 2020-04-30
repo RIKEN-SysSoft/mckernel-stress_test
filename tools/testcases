@@ -1,0 +1,16 @@
+stress-1-1-segviolation-001|page_fault_handler,killit -np 4 -nosignal,segviolation -nt 4
+stress-1-2-segviolation-001|page_fault_handler,,segviolation -nt 4
+stress-3-1-signalonread-001|,killit -t 1000,signalonread -nosignal
+stress-3-2-signalonread-001|,killit -np 8 -nosignal,signalonread
+stress-3-3-signalonread-001|,,signalonread -nt 8
+stress-3-4-signalonread-001|,killit -t 4000,signalonread -nt 4 -nosignal
+stress-4-1-signalonfutex-001|,killit -np 16,signalonfutex -nosignal
+stress-4-2-signalonfutex-001|,killit -np 16 -nosignal,signalonfutex
+stress-4-3-signalonfutex-001|,,signalonfutex -nt 16
+stress-5-1-simultaneousterm-001|,,simultaneousterm -nt 16
+stress-6-1-signalonfork-001|,killit -np 8 -t 2000,signalonfork -nosignal
+stress-6-2-signalonfork-001|,,signalonfork
+stress-7-1-stackcorruption-001|page_fault_handler,,stackcorruption
+stress-7-2-stackcorruption-001|page_fault_handler,,stackcorruption -nt 8
+stress-8-1-stackoverflow-001|page_fault_handler,,stackoverflow
+stress-8-2-stackoverflow-002|page_fault_handler,,stackoverflow -nt 8

@@ -51,6 +51,7 @@ AC_DEFINE_UNQUOTED(HOST_CPU_AARCH64,"$host_cpu_aarch64",[Architecture is aarch64
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
-		 src/init/Makefile
-		 src/fini/Makefile])
+		 tools/Makefile
+		 tools/init/Makefile
+		 tools/fini/Makefile])
 AC_OUTPUT

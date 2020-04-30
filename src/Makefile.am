@@ -2,12 +2,6 @@
 #
 #
 
-dist_bin_SCRIPTS = config.sh \
-	mck-boot.sh \
-	mck-stop.sh \
-	mck-mcexec.sh \
-	run.sh
-
 bin_PROGRAMS = killit \
 	signalonread \
 	signalonfutex \
@@ -44,5 +38,3 @@ segviolation_CFLAGS = -g -O2
 stackoverflow_SOURCES = stackoverflow.c
 stackoverflow_LDFLAGS = -lpthread
 stackoverflow_CFLAGS = -g -O2
-
-SUBDIRS = init fini

@@ -1,12 +1,12 @@
 #!/bin/awk -f
 
-# usage: awk -f gen_autotest_scripts.awk testcases
+# usage: cd <stress_test-install> && awk -f gen_autotest_scripts.awk testcases
 
 BEGIN { 
     FS="|"
-    "pwd -P" | getline cwd;
     "dirname " ARGV[0] | getline dir;
-    "cd " dir "/../.. && pwd -P" | getline autotest_home;
+    "cd " dir "/../../.. && pwd -P" | getline autotest_home;
+    "cd " dir "/.. && pwd -P" | getline stress_test_install;
 
     scriptdir = sprintf("%s/data/scripts", autotest_home); 
     system("rm -f " scriptdir "/stress-*");
@@ -20,15 +20,12 @@ BEGIN {
     print "#!/bin/sh\n"  > script;
 
     print "# Define WORKDIR, DATADIR, MCKINSTALL etc." >> script;
-    print ". ${AUTOTEST_HOME}/bin/config.sh\n" >> script;
+    printf(". %s/bin/config.sh\n", autotest_home) >> script;
 
-    # Switch recorddir for McKernel run and Linux run
-
-    recorddir_base = "$WORKDIR/output";
-    printf("recorddir=%s/%s\n", recorddir_base, script_bn) >> script;
+    printf("recorddir=$WORKDIR/output/%s\n", script_bn) >> script;
 
     printf("commands='%s'\n\n", commands) >> script;
-    print(". ${AUTOTEST_HOME}/stress_test/util/run.sh") >> script;
+    printf(". %s/bin/run.sh", stress_test_install) >> script;
 
     system("chmod +x " script);
 }
