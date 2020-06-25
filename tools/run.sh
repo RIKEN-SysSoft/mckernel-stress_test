@@ -4,7 +4,7 @@
 
 SCRIPT_PATH=$(readlink -m "${BASH_SOURCE[0]}")
 AUTOTEST_HOME="${SCRIPT_PATH%/*/*/*/*}"
-STRESS_TEST_DIR=$AUTOTEST_HOME/stress_test/install
+STRESS_TEST_DIR="${SCRIPT_PATH%/*/*}"
 
 error() {
     echo $1
