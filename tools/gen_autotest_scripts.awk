@@ -17,7 +17,7 @@ BEGIN {
     commands = $2;
     script = sprintf("%s/%s", scriptdir, script_bn);
 
-    print "#!/bin/sh\n"  > script;
+    print "#!/usr/bin/bash\n"  > script;
 
     print "# Define WORKDIR, DATADIR, MCKINSTALL etc." >> script;
     printf(". %s/bin/config.sh\n", autotest_home) >> script;
