@@ -1,0 +1,70 @@
+function backup_mck()
+{
+    [[ ! -d @WITH_MCK@ ]] && return 1
+    rm -rf @WITH_MCK@.backup
+    mv @WITH_MCK@{,.backup}
+}
+
+function restore_mck()
+{
+    [[ ! -d @WITH_MCK@.backup ]] && return 1
+    rm -rf @WITH_MCK@
+    mv @WITH_MCK@{.backup,}
+}
+
+function patch_and_build()
+{
+    fn_mckernel=$1
+    fn_ihk=$2
+
+    if [ "$fn_mckernel" != "" ]; then
+	pushd @WITH_MCK_SRC@
+        patch -p1 < @prefix@/bin/${fn_mckernel}.patch
+	ret=$?
+	if [ $ret -ne 0 ]; then
+	    echo "[INTERR] patch failed"
+            patch -p1 -R < @prefix@/bin/${fn_mckernel}.patch
+	    return $ret
+	fi
+	popd
+    fi
+
+    if [ "$fn_ihk" != "" ]; then
+	pushd @WITH_MCK_SRC@/ihk
+        patch -p1 < @prefix@/bin/${fn_ihk}.patch
+	ret=$?
+	if [ $ret -ne 0 ]; then
+	    echo "[INTERR] patch failed"
+            patch -p1 -R < @prefix@/bin/${fn_ihk}.patch
+	    return $ret
+	fi
+	popd
+    fi
+
+    BUILDDIR=$WORKDIR/build/$(uname -r)
+
+    if [ -f ${AUTOTEST_HOME}/bin/config.sh ]; then
+	pushd $BUILDDIR
+    else
+	rm -rf $BUILDDIR
+	mkdir -p $BUILDDIR
+	pushd $BUILDDIR
+	cmake @WITH_MCK_SRC@ -DCMAKE_INSTALL_PREFIX=@WITH_MCK@
+    fi
+    make -j install
+    popd
+
+    if [ "$fn_mckernel" != "" ]; then
+	pushd @WITH_MCK_SRC@
+        patch -R -p1 < @prefix@/bin/${fn_mckernel}.patch
+	popd
+    fi
+
+    if [ "$fn_ihk" != "" ]; then
+	pushd @WITH_MCK_SRC@/ihk
+        patch -R -p1 < @prefix@/bin/${fn_ihk}.patch
+        popd
+    fi
+
+    return 0
+}

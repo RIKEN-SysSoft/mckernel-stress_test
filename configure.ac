@@ -9,6 +9,12 @@ AC_CONFIG_HEADERS([config.h])
 
 CFLAGS=""
 
+AC_ARG_VAR(WITH_MCK_SRC, "McKernel source directory"")
+AS_IF([test -z $WITH_MCK_SRC], [AC_MSG_ERROR("specify WITH_MCK_SRC=<mckernel_source>")])
+
+AC_ARG_VAR(WITH_MCK, "McKernel install directory"")
+AS_IF([test -z $WITH_MCK], [AC_MSG_ERROR("specify WITH_MCK=<mckernel_install>")])
+
 # Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
@@ -52,6 +58,7 @@ AC_DEFINE_UNQUOTED(HOST_CPU_AARCH64,"$host_cpu_aarch64",[Architecture is aarch64
 AC_CONFIG_FILES([Makefile
                  src/Makefile
 		 tools/Makefile
+		 tools/util.sh
 		 tools/init/Makefile
 		 tools/fini/Makefile])
 AC_OUTPUT

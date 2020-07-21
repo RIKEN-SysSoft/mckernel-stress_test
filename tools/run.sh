@@ -35,10 +35,11 @@ fi
 # Parse
 keyword=$(echo $commands | awk 'BEGIN {FS=","} {print $1}')
 linuxprog=$(echo $commands | awk 'BEGIN {FS=","} {print $2}')
+[[ "$linuxprog" != "" ]] && linuxprog="$STRESS_TEST_DIR/bin/$linuxprog"
 mckprog=$(echo $commands | awk 'BEGIN {FS=","} {print $3}')
 
 # Run test
-eval "timeout -s 9 $STRESS_TEST_TIMEOUT $STRESS_TEST_DIR/bin/$linuxprog $MCKINSTALL/bin/mcexec $STRESS_TEST_DIR/bin/$mckprog" > $recorddir/dtest.log 2>&1
+eval "timeout -s 9 $STRESS_TEST_TIMEOUT $linuxprog $MCKINSTALL/bin/mcexec $STRESS_TEST_DIR/bin/$mckprog" > $recorddir/dtest.log 2>&1
 ret=$?
 
 # Clean up files etc.
