@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -11,7 +12,11 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <libgen.h>
+#include <semaphore.h>
+#include <errno.h>
+#include <sys/mman.h>
 
+static sem_t *sem = MAP_FAILED;
 
 #define MAXBUFFSIZE (2LL * 1024LL * 1024LL * 1024LL)
 #define MAXNUMTHREADS	256
@@ -19,7 +24,6 @@
 
 int argc;
 char** argv;
-int numthreads = 1;
 int nosignal = 0;
 size_t buffsize = MAXBUFFSIZE;
 int timetowait = DEFAULTTIMETOWAIT;
@@ -28,68 +32,20 @@ struct timeval timeBeforeFork;
 struct timeval timeBeforeRead;
 struct timeval timeAfterRead;
 
-
 #define LAPTIME_MS(start, stop) ((stop.tv_sec - start.tv_sec) * 1000 + (stop.tv_usec - start.tv_usec) / 1000)
-
-struct Thread {
-	int tid;
-	pthread_t pthread;
-} thread[MAXNUMTHREADS];
-
-pthread_barrier_t barrier;
 
 #define onError(fmt, args...) \
 do { \
-	fprintf(stderr, "[ NG ] " fmt "\n", ##args); \
+	fprintf(stderr, "[INTERR] " fmt "\n", ##args);	\
 	exit(-1); \
 } while(0)
 
-
-void* subjectThread(void*);
-
-void createThreads() {
-
-	if (pthread_barrier_init(&barrier, NULL, numthreads)) {
-		onError("pthread_barrier_init fail");
-	}
-
-	int i;
-	for (i = 1; i < numthreads; i++) {
-		int rval;
-		thread[i].tid = i;
-		rval = pthread_create(&thread[i].pthread, NULL, subjectThread, &thread[i]);
-		if (rval) {
-			onError("pthread_create fail");
-		}
-	}
-
-	thread[0].tid = 0;
-	thread[0].pthread = pthread_self();
-	subjectThread(&thread[0]);
-}
-
-
-void joinThreads() {
-
-	int i;
-
-	for (i = 1; i < numthreads; i++) {
-		void* rval;
-		if (pthread_join(thread[i].pthread, &rval)) {
-			onError("pthread_join fail");
-		}  
-	}
-
-	printf("Join done\n");
-}
-
-
-void subjectTask(struct Thread* thread) {
-
+void reader(void) {
 	char* buffer = malloc(buffsize);
 	if (buffer == NULL) {
 		onError("malloc fail");
 	}
+	pid_t pid = getpid();
 
 	int fd;
 	char filename[1024];
@@ -100,12 +56,16 @@ void subjectTask(struct Thread* thread) {
 		onError("open fail");
 	}
 
-	pthread_barrier_wait(&barrier);
+	sem_post(sem);
+
+	int semval;
+	sem_getvalue(sem, &semval);
+	fprintf(stderr, "[INFO] child %d: cpu: %d, sem value: %d\n",
+		pid, sched_getcpu(), semval);
 
 	gettimeofday(&timeBeforeRead, NULL);
-	printf("[%d] setup took %d ms (should be less than %d ms)\n",
-	       thread->tid, LAPTIME_MS(timeBeforeFork, timeBeforeRead),
-	       timetowait);
+	fprintf(stderr, "[INFO] child %d: fork and pthread_create took %d ms\n",
+	       pid, LAPTIME_MS(timeBeforeFork, timeBeforeRead));
 
 	char* buffp;
 	size_t size_to_read;
@@ -113,69 +73,33 @@ void subjectTask(struct Thread* thread) {
 	buffp = buffer;
 	size_to_read = buffsize;
 	while (size_to_read > 0) {
-		fprintf(stderr, "[%d] reading %lld bytes...\n",
-			thread->tid, size_to_read, buffp);
-		rval = read(fd, buffp, size_to_read);
+		rval = read(fd, buffp, 1UL << 30);
 		if (rval == 0) {
 			break;
 		}
 		if (rval < 0) {
-			onError("read fail");
+			if (errno != EINTR) {
+				onError("read failed with %d", errno);
+			}
+			fprintf(stderr, "[INFO] child %d: interrupted\n", pid);
+			continue;
 		}
 		size_to_read -= rval;
 		buffp += rval;
+		fprintf(stdout, "[ NG ] child %d: read: %lld bytes\n",
+			pid, rval);
 	}
-
-	printf("[ NG ] %d-th thread didn't received a signal while reading\n",
-	       thread->tid);
 
 	gettimeofday(&timeAfterRead, NULL);
 
-	fprintf(stderr, "[%d] %s read %lld bytes\n", thread->tid, argv[0], buffp - buffer);
-	printf("[%d] read: %d ms\n", thread->tid, LAPTIME_MS(timeBeforeRead, timeAfterRead));
-
-//	for(;;);
-	exit(-1);
+	fprintf(stderr, "[INFO] child %d: total: %lld bytes\n", pid, buffp - buffer);
+	fprintf(stderr, "[INFO] child %d: took %d ms\n", pid, LAPTIME_MS(timeBeforeRead, timeAfterRead));
+	fprintf(stderr, "[ NG ] child %d: expected: killed, actual: read done\n", pid);
+	return;
 }
 
 
-void subjectProcess() {
-
-	printf("[%d] I am a subject.\n", getpid());
-
-//	Subjecttask();
-}
-
-
-void subjectCleanup(void* arg) {
-
-	struct Thread* thread = (struct Thread*) arg;
-	printf("[%d] cleanup\n", thread->tid);
-}
-
-
-void* subjectThread(void* arg) {
-
-	struct Thread* thread = (struct Thread*)arg;
-
-	printf("[%d] I am a subjectThread %d, %x %x\n", getpid(), thread->tid, thread->pthread, pthread_self());
-
-	pthread_cleanup_push(subjectCleanup, arg);
-
-	//sleep(random() % 5 + 1);
-	//printf("[%d:%d] wake up\n", getpid(), thread->tid);
-
-	pthread_barrier_wait(&barrier);
-
-	subjectTask(thread);
-
-	pthread_cleanup_pop(1);
-
-	return NULL;
-}
-
-void
-tvsub(struct timeval *tv1, struct timeval *tv2)
+void tvsub(struct timeval *tv1, struct timeval *tv2)
 {
 	tv1->tv_sec -= tv2->tv_sec;
 	tv1->tv_usec -= tv2->tv_usec;
@@ -185,8 +109,7 @@ tvsub(struct timeval *tv1, struct timeval *tv2)
 	}
 }
 
-void examinerProcess(pid_t subject) {
-	printf("[%d] I am the examiner for %d.\n", getpid(), subject);
+void killer(pid_t subject) {
 
 	struct timespec req, rem;
 	struct timeval tv_start;
@@ -198,31 +121,43 @@ void examinerProcess(pid_t subject) {
 	tv_wk.tv_sec = req.tv_sec;
 	tv_wk.tv_usec = (timetowait %1000) * 1000;
 
+	/* wait until fork() completes */
+	fprintf(stderr, "[INFO] parent: cpu: %d, wait until fork() completes\n", sched_getcpu());
+	sem_wait(sem);
+	fprintf(stderr, "[INFO] parent: cpu: %d, woken up\n", sched_getcpu());
+
 	gettimeofday(&tv_start, NULL);
+
+	fprintf(stderr, "[INFO] parent: wait for a while before sending singal...\n");
 	if (nanosleep(&req, &rem) < 0) {
 		fprintf(stderr, "nanosleep is interrupted, but ignore\n");
 	}
 
+	fprintf(stderr, "[INFO] parent: sending SIGTERM to %d\n", subject);
 	if (kill(subject, SIGTERM) < 0) {
-		printf("[ NG ] child process not found\n");
+		fprintf(stderr, "[ NG ] child process not found\n");
 		exit (-1);
 	}
 
 	int status;
 	if (waitpid(subject, &status, 0) < 0) {
-		onError("waitpid fail");
+		onError("waitpid failed with %d", errno);
 	}
 	gettimeofday(&tv_end, NULL);
 
 	tvsub(&tv_end, &tv_start);
 	tvsub(&tv_end, &tv_wk);
 	if (tv_end.tv_sec >= 3) {
-		onError("[ NG ] response time (%f) is greater or equal to 3 second",
+		fprintf(stderr, "[ NG ] response time (%f) >= 3 sec\n",
+			tv_end.tv_sec + (double)tv_end.tv_usec / 1000000);
+		return;
+	} else {
+		fprintf(stderr, "[ OK ] response time (%f) < 3 sec\n",
 			tv_end.tv_sec + (double)tv_end.tv_usec / 1000000);
 	}
 
 	if (WIFEXITED(status)) {
-		printf("[ NG ] child process exited by itself with return value of %d\n",
+		fprintf(stderr, "[ NG ] child process exited by itself with return value of %d\n",
 		       WEXITSTATUS(status));
 		if (WEXITSTATUS(status) == 0) {
 			exit(-1);
@@ -236,10 +171,10 @@ void examinerProcess(pid_t subject) {
 		int sig = WTERMSIG(status);
 
 		if (sig == SIGTERM) {
-			printf("[ OK ] child process is killed by the expected signal (%d)\n",
+			fprintf(stderr, "[ OK ] child process is killed by the expected signal (%d)\n",
 			       sig);
 		} else {
-			printf("[ NG ] child process is killed by an unexpected signal (%d)\n",
+			fprintf(stderr, "[ NG ] child process is killed by an unexpected signal (%d)\n",
 			       sig);
 			exit(sig);
 		}
@@ -254,19 +189,10 @@ int main(int _argc, char** _argv)
 	argc = _argc;
 	argv = _argv;
 
-	printf("DANGERTEST SIGNALONREAD\n");
+	fprintf(stderr, "DANGERTEST SIGNALONREAD\n");
 
 	int i;
 	for (i = 1; i < argc; i++) {
-		if (strcmp("-nt", argv[i]) == 0) {
-			i++;
-			if (i < argc) {
-				numthreads = atoi(argv[i]);
-				continue;
-			}
-			fprintf(stderr, "%s: num threads required\n", argv[0]);
-			exit(-1);
-		}
 		if (strcmp("-nosignal", argv[i]) == 0) {
 			nosignal = 1;
 			continue;
@@ -295,32 +221,32 @@ int main(int _argc, char** _argv)
 		exit(-1);
 	}
 
-	if (numthreads < 1 || numthreads > MAXNUMTHREADS) {
-		fprintf(stderr, "%s: invalid num threads\n", argv[0]);
-		exit(-1);
+	fprintf(stderr, "NOSIGNAL: %d\n", nosignal);
+	fprintf(stderr, "TIMETOWAIT: %d msec\n", timetowait);
+	fprintf(stderr, "BUFFSIZE: %lld\n", buffsize);
+
+	sem = (sem_t *)mmap(NULL, sizeof(sem_t),
+			     PROT_READ | PROT_WRITE,
+			     MAP_SHARED | MAP_ANONYMOUS,
+			     -1, 0);
+	if (sem == MAP_FAILED) {
+		onError("allocating sem");
 	}
 
-	printf("NUMTHREADS: %d\n", numthreads);
-	printf("NOSIGNAL: %d\n", nosignal);
-	printf("TIMETOWAIT: %d msec\n", timetowait);
-	printf("BUFFSIZE: %lld\n", buffsize);
-
-	//	setup();
+	sem_init(sem, 1, 0);
 
 	gettimeofday(&timeBeforeFork, NULL);
 
 	if (nosignal) {
-		createThreads();
-		joinThreads();
+		reader();
 	} else {
 		pid = fork();
 		if (pid < 0) {
 			onError("fork");
 		} else if (pid == 0) {
-			createThreads();
-			joinThreads();
+			reader();
 		} else {
-			examinerProcess(pid);
+			killer(pid);
 		}
 	}
 
