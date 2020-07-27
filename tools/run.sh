@@ -23,10 +23,8 @@ $ihkosctl 0 clear_kmsg || exit $?
 old_ulimit=$(ulimit -c)
 ulimit -S -c 0
 
-# e.g. extract "segviolation" from "stress-1-1-segviolation-001"
-testname=$(basename $0)
-testname=${testname%-*}
-testname=${testname##*-}
+# e.g. extract "signalonread" from "stress-signalonread01"
+testname=$(echo $SCRIPT_NAME | awk -F- '{print $NF}' | grep -oE '[a-z]*')
 
 if [ -e $STRESS_TEST_DIR/bin/init/${testname}.sh ]; then
     . $STRESS_TEST_DIR/bin/init/${testname}.sh
