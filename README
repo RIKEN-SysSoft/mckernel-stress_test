@@ -1,0 +1,6 @@
+==============
+How to install
+==============
+
+autoreconf -iv
+WITH_MCK_SRC=path/to/mckernel/src WITH_MCK=/path/to/mckernel/install ./configure --prefix=<install-path>
